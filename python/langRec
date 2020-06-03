@@ -1,0 +1,19 @@
+import numpy as np
+
+def genRandomHV(D):
+	if D%2 == 1:
+		print("Dimension is odd!")
+	else:
+		randomIndex = np.random.permutation(D) #create a D array with random permutations
+		#print(randomIndex)
+		entries = range(D)
+		randomHV = np.zeros((len(entries),))		#preallocate array, from chrisschell.de
+		half = D/2
+		randomHV[np.where(randomIndex < half)] = 1; #if array
+		randomHV[np.where(randomIndex >= half)] = -1;
+		print(np.mean(randomHV))
+		
+
+if __name__ == '__main__':
+    D = input("Enter dimensions: ")
+    genRandomHV(D)
