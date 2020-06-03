@@ -11,3 +11,8 @@ Andrew - total time = 7385.882 seconds
 	OS:	Windows 10 Pro x64 version 18362.836
 	CPU:	Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz 1.99 GHz
 	RAM:	16 GB
+
+Caroline - total time = 7243.337 seconds
+	OS:	Windows 10 Home x64 version 18363
+	CPU:	Intrel(R) Core(TM) i7-8565U CPU @ 1.80GHz 1.99GHz
+	RAM:	16 GB
