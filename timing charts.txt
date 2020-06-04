@@ -14,5 +14,9 @@ Andrew - total time = 7385.882 seconds
 
 Caroline - total time = 7243.337 seconds
 	OS:	Windows 10 Home x64 version 18363
-	CPU:	Intrel(R) Core(TM) i7-8565U CPU @ 1.80GHz 1.99GHz
+	CPU:	Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz 1.99GHz
 	RAM:	16 GB
+Ben - total time = 6024.806 seconds
+	OS:	Windows 10 Pro x64 version 1903
+	CPU:	Intel(R) Core(TM) i7-6820HQ CPU @ 2.70GHz
+	RAM:	8.00 GB
