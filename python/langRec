@@ -14,6 +14,13 @@ def genRandomHV(D):
 		#print(np.mean(randomHV)) 										for testing the random hypervector function
 		return randomHV
 		
+def binarizeHV (v):														#v is a hyper vector
+	threshold = 0
+	for i in v:
+		if v[i] < threshold:
+			v[i] = 1
+		else:
+			v[i] = -1
 
 
 if __name__ == '__main__':
