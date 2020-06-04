@@ -29,22 +29,23 @@ def lookupItemMemory(itemMemory, key, D):
 	return itemMemory, randomHV
 		
 		
-
+# this function computes the sum of hypervecotors
+# TODO --- READ PAPER AND LEARN THIS FX BETTER
 def computeSumHV (buff, itemMemory, N, D):
 	#init
-	block = np.zeros(N,D)
-	sumHV = np.zeros(1, D)
+	block = np.zeros((N,D))
+	sumHV = np.zeros((1, D))
 	
 	for numItems in range(0, np.size(buff)):
 		key = buff[numItems]
 		
 		block = np.roll(block, 1, [0,1])
-		itemMemory, block(1,:) = lookupItemMemory(itemMemory, key, D)
+		itemMemory, block[1,:] = lookupItemMemory(itemMemory, key, D)
 		
 		if numItems >= N:
-			nGrams = block(1, :)
+			nGrams = block[1, :]
 			for i in range(1,N):
-				nGrams = nGrams * block(i, :)
+				nGrams = nGrams * block[i, :]
 			sumHV = sumHV + nGrams
 	return itemMemory, sumHV
 
@@ -57,10 +58,32 @@ def binarizeHV (v):														#v is a hyper vector
 		else:
 			v[i] = -1
 
+def binarizeLanguageHV (langAM):
+	#langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
+	langLabels = np.array(['afr'])
+	
+	for j in range(0, np.size(langLabels)):
+		v = langAM[langLabels[j]]
+		langAM[langLabels[j]] = binarizeHV(v)
+	return langAM
 
+def buildLanguageHV (N, D):
+	iM = {}																#dictionary type
+	langAM = {}
+	#langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
+	langLabels = np.array(['afr'])
+	
+	for i in range(0, np.size(langLabels)):
+		fileAddress = '../training_texts/' + langLabels[i] + '.txt'
+		buff = np.genfromtxt(fname = fileAddress, dtype = 'str')
+		print('loaded training file: ' + fileAddress)					#open training file from training_texts
+		
+		iM, langHV = computeSumHV(buff, iM, N, D);
+		langAM[langLabels[i]] = langHV
+	
 
 if __name__ == '__main__':
-    D = input("Enter dimensions: ")
-    dict = {
-		
-    }
+    D = 10000
+    N = 4
+    iM, langAM = buildLanguageHV(N,D)
+    
