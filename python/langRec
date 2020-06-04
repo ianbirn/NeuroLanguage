@@ -48,6 +48,7 @@ def computeSumHV (buff, itemMemory, N, D):
 			sumHV = sumHV + nGrams
 	return itemMemory, sumHV
 
+
 def binarizeHV (v):														#v is a hyper vector
 	threshold = 0
 	for i in v:
