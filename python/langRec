@@ -13,6 +13,20 @@ def genRandomHV(D):
 		randomHV[np.where(randomIndex >= half)] = -1;					#^^^^^ same, but set to -1
 		#print(np.mean(randomHV)) 										for testing the random hypervector function
 		return randomHV
+
+# this function takes in an item memory (in MATLAB, essentially a 2D array
+# designed for easy lookups and data matching, see MATLAB documentation, a key
+# (which is a values name to search for, in this case each trigram has a corresponding
+# HV if the key (or trigram) isn't present, it is created with genRandomHV
+# for this implementation, a dictionary will be used
+
+def lookupItemMemory(itemMemory, key, D):
+	if key in itemMemory:
+		randomHV = itemMemory[key]										#found the key!
+	else:
+		itemMemory[key] = genRandomHV(D)
+		randomHV = itemMemory[key]
+	return itemMemory, randomHV
 		
 def binarizeHV (v):														#v is a hyper vector
 	threshold = 0
@@ -23,6 +37,9 @@ def binarizeHV (v):														#v is a hyper vector
 			v[i] = -1
 
 
+
 if __name__ == '__main__':
     D = input("Enter dimensions: ")
-    genRandomHV(D)
+    dict = {
+		
+    }
