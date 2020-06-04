@@ -24,21 +24,31 @@ int main() {
 	
 	
 	for(int i=0; i<length; i++) {
-		//Creating the file address
-
+		
+		
+		//Curently ignoring the issue when i=1
+		if (i==1) {
+			i++;
+		}
+		
+		
 		char *ptr = langLabels[i];
 		
+		//Creating the file address 
 		char fileAddress[] = "./training_texts/"; char txt[] = ".txt"; strcat(fileAddress, ptr); strcat(fileAddress, txt);
 		printf("%s\n", fileAddress);
 		
+		//Opening the file address
 		FILE *fileID = fopen(fileAddress, "r"); 
 		
-		
+		//Check to make sure the file can be opended
 		if (fileID == NULL) {
 			printf("Failed: File could not be opened.\n");
 			return 1;
 		}
 		
+		
+		//Compiles every character in the text document into array, buffer
 		int count=0;
 		char buffer[count];
 		
@@ -51,10 +61,14 @@ int main() {
 			
 		}
 		fclose(fileID);
+		buffer[0] = '\0';
+		printf("Loaded training language file %s\n", fileAddress);
+		
+		
 		
 
-		printf("Loaded training language file %s\n", fileAddress);
-	
+		
+		
 	}
 	
 	
