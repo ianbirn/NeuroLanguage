@@ -28,6 +28,26 @@ def lookupItemMemory(itemMemory, key, D):
 		randomHV = itemMemory[key]
 	return itemMemory, randomHV
 		
+		
+
+def computeSumHV (buff, itemMemory, N, D):
+	#init
+	block = np.zeros(N,D)
+	sumHV = np.zeros(1, D)
+	
+	for numItems in range(0, np.size(buff)):
+		key = buff[numItems]
+		
+		block = np.roll(block, 1, [0,1])
+		itemMemory, block(1,:) = lookupItemMemory(itemMemory, key, D)
+		
+		if numItems >= N:
+			nGrams = block(1, :)
+			for i in range(1,N):
+				nGrams = nGrams * block(i, :)
+			sumHV = sumHV + nGrams
+	return itemMemory, sumHV
+
 def binarizeHV (v):														#v is a hyper vector
 	threshold = 0
 	for i in v:
