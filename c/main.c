@@ -1,6 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include "gen_randomhv.h"
 #include "cos_angle.h"
+
 
 int main() {
 	
@@ -20,6 +23,8 @@ int main() {
 	double distance = cosAngle(u, v, x);
 	
 	printf("%g\n", distance);
+	
+	free(ptr);
 	
 	return 0;
 }
