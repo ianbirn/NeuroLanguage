@@ -33,8 +33,8 @@ def lookupItemMemory(itemMemory, key, D):
 # TODO --- READ PAPER AND LEARN THIS FX BETTER
 def computeSumHV (buff, itemMemory, N, D):
 	#init
-	block = np.zeros(N,D)
-	sumHV = np.zeros(1, D)
+	block = np.zeros((N,D))
+	sumHV = np.zeros((1, D))
 	
 	for numItems in range(0, np.size(buff)):
 		key = buff[numItems]
@@ -59,7 +59,8 @@ def binarizeHV (v):														#v is a hyper vector
 			v[i] = -1
 
 def binarizeLanguageHV (langAM):
-	langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
+	#langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
+	langLabels = np.array(['afr'])
 	
 	for j in range(0, np.size(langLabels)):
 		v = langAM[langLabels[j]]
@@ -69,7 +70,8 @@ def binarizeLanguageHV (langAM):
 def buildLanguageHV (N, D):
 	iM = {}																#dictionary type
 	langAM = {}
-	langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
+	#langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
+	langLabels = np.array(['afr'])
 	
 	for i in range(0, np.size(langLabels)):
 		fileAddress = '../training_texts/' + langLabels[i] + '.txt'
