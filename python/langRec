@@ -12,6 +12,7 @@ def genRandomHV(D):
 		randomHV[np.where(randomIndex < half)] = 1; 					#find permutation array < half, those index set to 1
 		randomHV[np.where(randomIndex >= half)] = -1;					#^^^^^ same, but set to -1
 		#print(np.mean(randomHV)) 										for testing the random hypervector function
+		randomIndex=[]
 		return randomHV
 
 # this function takes in an item memory (in MATLAB, essentially a 2D array
@@ -48,6 +49,7 @@ def computeSumHV (buff, itemMemory, N, D):
 				nGrams = nGrams * block[i, :]
 			sumHV = sumHV + nGrams
 	
+	block=[]
 	return itemMemory, sumHV
 
 
@@ -60,8 +62,7 @@ def binarizeHV (v):														#v is a hyper vector
 			v[i] = -1
 
 def binarizeLanguageHV (langAM):
-	langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
-	
+
 	for j in range(0, np.size(langLabels)):
 		v = langAM[langLabels[j]]
 		langAM[langLabels[j]] = binarizeHV(v)
@@ -70,26 +71,43 @@ def binarizeLanguageHV (langAM):
 def buildLanguageHV (N, D):
 	iM = {}																#dictionary type
 	langAM = {}
-	langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
 	
-	for i in range(0, np.size(langLabels)):
-		fileAddress = '../training_texts/' + langLabels[i] + '.txt'
-		buff = []
+	# for i in range(0, np.size(langLabels)):
+		# fileAddress = '../training_texts/' + langLabels[i] + '.txt'
+		# buff = []
 		
-		with open(fileAddress, 'r') as txt:
-			for line in txt:
-				buff.append(line)
+		# txt = open(fileAddress, 'r')
+		# for line in txt:
+			# buff.append(line)
 		
-		print('loaded training file: ' + fileAddress)					#open training file from training_texts
+		# print('loaded training file: ' + fileAddress)					#open training file from training_texts
 		
-		iM, langHV = computeSumHV(buff, iM, N, D);
-		langAM[langLabels[i]] = langHV
+		# iM, langHV = computeSumHV(buff, iM, N, D);
+		# langAM[langLabels[i]] = langHV
+		# txt.close()
+	fileAddress = '../training_texts/' + langLabels[1] + '.txt'
+	buff = []
+	txt = open(fileAddress)
+	for line in txt:
+		buff.append(line)
 		
+	print('loaded trainign file')
+	iM, langHV = computeSumHV(buff, iM, N, D);
+	langAM[langLabels[0]] = langHV
+	txt.close()
 	return iM, langAM
 	
 
 if __name__ == '__main__':
     D = 10000
     N = 4
+    langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
+
     iM, langAM = buildLanguageHV(N,D)
+    
+    #print(langAM)
+    outp = open('out.txt', 'w')
+    for line in langAM.values():
+		outp.write(str(line))
+    
     
