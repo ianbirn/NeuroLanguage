@@ -47,6 +47,7 @@ def computeSumHV (buff, itemMemory, N, D):
 			for i in range(1,N):
 				nGrams = nGrams * block[i, :]
 			sumHV = sumHV + nGrams
+	
 	return itemMemory, sumHV
 
 
@@ -73,11 +74,17 @@ def buildLanguageHV (N, D):
 	
 	for i in range(0, np.size(langLabels)):
 		fileAddress = '../training_texts/' + langLabels[i] + '.txt'
-		buff = np.genfromtxt(fname = fileAddress, dtype = 'str')
+		buff = []
+		
+		with open(fileAddress, 'r') as txt:
+			for line in txt:
+				buff.append(line)
+		
 		print('loaded training file: ' + fileAddress)					#open training file from training_texts
 		
 		iM, langHV = computeSumHV(buff, iM, N, D);
 		langAM[langLabels[i]] = langHV
+		
 	return iM, langAM
 	
 
