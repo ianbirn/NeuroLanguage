@@ -110,4 +110,5 @@ if __name__ == '__main__':
     for line in langAM.values():
 		outp.write(str(line))
     
-    
+    outp.close()
+#todo -- look into how variables are passed from fxn to fxn in python, are multiple references created?
