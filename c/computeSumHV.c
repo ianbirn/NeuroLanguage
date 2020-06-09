@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 int *perm(int D); //permutates an array
 int *genRandomHV(int D); //generates random hypervector
@@ -76,14 +75,15 @@ int main() {
 			}
 		}
 		
-		assignItemMemory(sizeof(buffer), buffer, itemMemory);
-		printf("%i\n", count);
-		for(int i=0; i<count; i++) {			
+		assignItemMemory(count, buffer, itemMemory);
+
+		for(int i=0; i<=count; i++) {			
 			
 			key = buffer[i];
 			circShift(N, D, block);
+			lookupItemMemory(D, itemMemory, key, block); 	
 			
-			lookupItemMemory(D, itemMemory, key, block); 		
+
 			
 			if (i >= N) {
 				int *temp = block[0];
@@ -228,20 +228,22 @@ void assignItemMemory(int size, char buff[], char itemMemory[]) {
 	//printf("\n");
 }
 int **createItemMemoryHV(int D) {
-	int **randomHV;
-	randomHV = malloc(sizeof(int*) * 27);
+	int **iMHV;
+	iMHV = malloc(sizeof(int*) * 27 * D);
 	
 	for(int i = 0; i < 27; i++) {
-		randomHV[i] = malloc(sizeof(int*) * D);
+		iMHV[i] = malloc(sizeof(int*) * D);
     }
 	
 	for(int i=0; i<27; i++) {
+		int *randomHV = genRandomHV(D);
 		for(int j=0; j<D; j++) {
-			randomHV[i] = genRandomHV(D);
+			iMHV[i][j] = randomHV[j];
 		}
+		free(randomHV);
 	}
 	
-	return randomHV;
+	return iMHV;
 }
 
 void lookupItemMemory(int D, char itemMemory[], char key, int block[][D]) {
@@ -259,4 +261,6 @@ void lookupItemMemory(int D, char itemMemory[], char key, int block[][D]) {
 			break;
 		}
 	}	
+	free(iMHV);
 }
+
