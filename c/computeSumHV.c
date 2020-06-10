@@ -13,7 +13,7 @@ void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int blo
 int main() {
 	//Declarations/initializations for computeSumHV
 	int N = 4;
-	int D = 100;
+	int D = 10000;
 	int sumHV[1][D];
 	int block[N][D];
 	char key;
@@ -28,7 +28,7 @@ int main() {
 	int length =  (sizeof langLabels)/(sizeof langLabels[0]); //size of langLabels
 	
 	//iterating through every file computingHV
-	for(int t=0; t<1; t++) {
+	for(int t=0; t<length; t++) {
 		//Creating the file address 
 		char fileAddress[29];
 		
@@ -86,9 +86,9 @@ int main() {
 			
 			key = buffer[i];
 			circShift(N, D, block);
-			printf("i %i ", i);
+			//printf("i %i ", i);
 			lookupItemMemory(D, iMHV, itemMemory, key, block); 	
-			/*
+			
 			if (i >= N) {
 				int *temp = block[0];
 				int nGrams[1][D];
@@ -113,7 +113,7 @@ int main() {
 						sumHV[row][col] = sumHV[row][col] + nGrams[row][col];
 					}
 				}
-			}*/
+			}
 		}
 		
 		for(int i=0; i<1; i++) {
@@ -216,10 +216,8 @@ void assignItemMemory(int size, char buff[], char itemMemory[]) {
 		else {	
 			itemMemory[i] = temp[0];
 			removeChar(temp, temp[0]);
-			//printf("%c", itemMemory[i]);
 		}
 	}
-	//printf("\n");
 }
 void createItemMemoryHV(int D, int iMHV[][D]) {
 	for(int i=0; i<27; i++) {
