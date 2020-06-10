@@ -115,7 +115,7 @@ void circShift(int n, int d, int arr[][d]) {
 		for(int j=0; j<d; j++) {
 			if (j == (d-1)) {
 				arr[i][0] = arr1[i][d-1];
-				//printf("%i ", arr2[i][0]);   #this was during testing
+				printf("%i ", arr[i][0]);   //#this was during testing
 			}
 			else {
 				arr[i][j+1] = arr1[i][j];
@@ -133,23 +133,6 @@ void removeChar(char *str, int c) {
 	str[j] = '\0';
 	
 }
-void assignItemMemory(int size, char buff[], char itemMemory[]) {
-	char temp[size];
-	
-	//so as to not delete content of original buffer
-	for(int i=0; i<size; i++) {
-		temp[i] = buff[i];
-	}
-	for(int i=0; i<=27; i++) {
-		if ((temp[0] == '\n') || (temp[0] == '\t') || (temp[0] == '\r')) {
-			removeChar(temp, '\n');
-		}
-		else {	
-			itemMemory[i] = temp[0];
-			removeChar(temp, temp[0]);
-		}
-	}
-}
 void createItemMemoryHV(int D, int iMHV[][D]) {
 	for(int i=0; i<27; i++) {
 		int randomHV[D];
@@ -163,11 +146,11 @@ void createItemMemoryHV(int D, int iMHV[][D]) {
 void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D]) {
 	for (int i=0; i<27; i++) {
 		if (itemMemory[i] == key) {
-			for(int j=0; j<1; j++) {
-				for(int k=0; k<D; k++) {
-					block[j][k] = iMHV[k];
-				}
+			for(int j=0; j<D; j++) {
+				block[0][j] = iMHV[i][j];
+				//printf("%i ", iMHV[0][j]);
 			}
+			//printf("\n");
 			break;
 		}
 	}	
@@ -175,7 +158,7 @@ void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int blo
 void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]) {
 	int block[N][D];
 	char key;
-	char itemMemory[27]; //every character in the alphabet & ' '
+	char itemMemory[27] = "abcdefghijklmnopqrstuvwxyz "; //every character in the alphabet & ' '
 	int iMHV[27][D];
 	
 	//Initializing block and sum to be arrays of 0
@@ -188,11 +171,11 @@ void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]) {
 		sumHV[i] = 0;
 	}
 	
-	assignItemMemory(count, buffer, itemMemory);
+	//assignItemMemory(count, buffer, itemMemory);
 	createItemMemoryHV(D, iMHV);
 	
 	
-	for(int i=0; i<=count; i++) {			
+	for(int i=0; i<=8; i++) {			
 			
 		key = buffer[i];
 		circShift(N, D, block);
@@ -200,12 +183,12 @@ void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]) {
 		lookupItemMemory(D, iMHV, itemMemory, key, block); 	
 			
 		if (i >= N) {
-			int *temp = block[0];
+			//int *temp = block[0];
 			int nGrams[D];
 				
 			//assigns nGrams to the first row of block
 			for(int j=0; j<D; j++) {
-				nGrams[j] = temp[j];
+				nGrams[j] = block[0][j];
 			}		
 				
 			for(int j=1; j<N; j++) {
@@ -220,8 +203,9 @@ void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]) {
 			}
 		}
 	}
+	/*
 	for(int i=0; i<D; i++) {
 		printf("%i ", sumHV[i]);
 	}
-	printf("\n");
+	printf("\n");*/
 }
