@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-int *perm(int D); //permutates an array
-int *genRandomHV(int D); //generates random hypervector
+void perm(int D, int arr[]); //permutates an array
+void genRandomHV(int D, int randomHV[]); //generates random hypervector
 void circShift(int n, int d, int arr[][d]); //shifts the array circularly
 void removeChar(char *s, int c); //removes every occurence of a specific character from a string
 void assignItemMemory(int size, char buff[], char itemMemory[]); //assigns the 27 chracters into an array 
-int **createItemMemoryHV(int D); //creates hypervectors for every single character in itemMemory
-//void lookupItemMemory(int D, char itemMemory[], char key, int block[][D]);
+void createItemMemoryHV(int D, int iMHV[][D]); //creates hypervectors for every single character in itemMemory
+void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D]); // sets the first row of block to the cooresponding randHV of key
 
 int main() {
 	//Declarations/initializations for computeSumHV
@@ -18,7 +18,8 @@ int main() {
 	int block[N][D];
 	char key;
 	char itemMemory[27]; //every character in the alphabet & ' '
-	int **iMHV;
+	int iMHV[27][D];
+	//int randomHV[D];
 	
 	//Creating langLabels
 	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
@@ -77,16 +78,17 @@ int main() {
 		}
 		
 		assignItemMemory(count, buffer, itemMemory);
-		iMHV = createItemMemoryHV(D);
+		//printf("Test");
+		createItemMemoryHV(D, iMHV);
 		
-
+		
 		for(int i=0; i<=count; i++) {			
 			
 			key = buffer[i];
 			circShift(N, D, block);
 			printf("i %i ", i);
-			//lookupItemMemory(D, itemMemory, key, block); 	
-			
+			lookupItemMemory(D, iMHV, itemMemory, key, block); 	
+			/*
 			if (i >= N) {
 				int *temp = block[0];
 				int nGrams[1][D];
@@ -111,7 +113,7 @@ int main() {
 						sumHV[row][col] = sumHV[row][col] + nGrams[row][col];
 					}
 				}
-			}
+			}*/
 		}
 		
 		for(int i=0; i<1; i++) {
@@ -127,10 +129,7 @@ int main() {
 		
 }
 
-int *perm(int D) {
-	int *arr;
-	arr = malloc(D*sizeof *arr);
-	
+void perm(int D, int arr[]) {	
 	//Initialize Array
 	for(int i=0; i<D; i++) {
 		arr[i] = i;
@@ -144,21 +143,16 @@ int *perm(int D) {
 		arr[k] = arr[j];
 		arr[j] = l; 
 	}
-	
-	return arr;
 }
 
-int *genRandomHV(int D) {
+void genRandomHV(int D, int randomHV[]) {
 	//Later will alter to be scanf (user input availability)
-	int *randomHV;
-	randomHV = malloc(D*sizeof *randomHV);
-	
 	if (D % 2 != 0) {
 		printf("Dimension is odd");
 	}
 	else {
 		//Permute the Array
-		randomHV = perm(D);
+		perm(D, randomHV);
 		
 		for(int i=0; i<D; i++) {
 			if (randomHV[i] <= D/2) {
@@ -169,8 +163,6 @@ int *genRandomHV(int D) {
 			}
 		}
 	}
-	 
-	return randomHV;
 }
 void circShift(int n, int d, int arr[][d]) {
 	int arr1[n][d];
@@ -229,26 +221,17 @@ void assignItemMemory(int size, char buff[], char itemMemory[]) {
 	}
 	//printf("\n");
 }
-int **createItemMemoryHV(int D) {
-	int **iMHV;
-	iMHV = malloc(sizeof(int*) * 27 * D);
-	
-	for(int i = 0; i < 27; i++) {
-		iMHV[i] = malloc(sizeof(int*) * D);
-    }
-	
+void createItemMemoryHV(int D, int iMHV[][D]) {
 	for(int i=0; i<27; i++) {
-		int *randomHV = genRandomHV(D);
+		int randomHV[D];
+		genRandomHV(D, randomHV);
 		for(int j=0; j<D; j++) {
 			iMHV[i][j] = randomHV[j];
 		}
-		free(randomHV);
 	}
-	
-	return iMHV;
 }
 
-void lookupItemMemory(int D, int ***iMHV, char itemMemory[], char key, int block[][D]) {
+void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D]) {
 	for (int i=0; i<27; i++) {
 		if (itemMemory[i] == key) {
 			for(int j=0; j<1; j++) {
@@ -259,6 +242,4 @@ void lookupItemMemory(int D, int ***iMHV, char itemMemory[], char key, int block
 			break;
 		}
 	}	
-	free(iMHV);
-	
 }
