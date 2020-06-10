@@ -9,17 +9,69 @@ void removeChar(char *s, int c); //removes every occurence of a specific charact
 void assignItemMemory(int size, char buff[], char itemMemory[]); //assigns the 27 chracters into an array 
 void createItemMemoryHV(int D, int iMHV[][D]); //creates hypervectors for every single character in itemMemory
 void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D]); // sets the first row of block to the cooresponding randHV of key
-
-int main() {
-	//Declarations/initializations for computeSumHV
-	int N = 4;
-	int D = 10000;
-	int sumHV[1][D];
+void computeSumHV(int D, int N, sumHV[D], int count, char buff[]) {
 	int block[N][D];
 	char key;
 	char itemMemory[27]; //every character in the alphabet & ' '
 	int iMHV[27][D];
-	//int randomHV[D];
+	
+	//Initializing block and sum to be arrays of 0
+	for(int i=0; i<N; i++) {
+		for(int j=0; j<D; j++) {
+			block[i][j] = 0;
+		}
+	}
+	for(int i=0; i<D; i++) {
+		sumHV[i] = 0;
+	}
+	
+	assignItemMemory(count, buffer, itemMemory);
+	createItemMemoryHV(D, iMHV);
+	
+	
+	for(int i=0; i<=count; i++) {			
+			
+		key = buffer[i];
+		circShift(N, D, block);
+		printf("i %i ", i);
+		lookupItemMemory(D, iMHV, itemMemory, key, block); 	
+			
+		if (i >= N) {
+			int *temp = block[0];
+			int nGrams[D];
+				
+			//assigns nGrams to the first row of block
+			for(int j=0; j<D; j++) {
+				nGrams[j] = temp[j];
+			}		
+				
+			for(int j=1; j<N; j++) {
+				for(int k=0; k<1; k++) {
+					for(int l=0; l<D; l++) {
+						nGrams[l] = nGrams[l] * block[j][l];
+					}
+				}
+			}	
+			for(int j=0; j<D; j++) {
+				sumHV[j] = sumHV[j] + nGrams[j];
+					}
+				}
+			}
+		}
+		
+		for(int i=0; i<D; i++) {
+			printf("%i ", sumHV[i]);
+			
+		}
+		printf("\n");
+    }
+}
+
+int main() {
+	//Declarations/initializations for computeSumHV
+	int N = 4;
+	int D = 10;
+	int sumHV[D];
 	
 	//Creating langLabels
 	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
@@ -28,7 +80,7 @@ int main() {
 	int length =  (sizeof langLabels)/(sizeof langLabels[0]); //size of langLabels
 	
 	//iterating through every file computingHV
-	for(int t=0; t<length; t++) {
+	for(int t=0; t<1s; t++) {
 		//Creating the file address 
 		char fileAddress[29];
 		
@@ -66,64 +118,7 @@ int main() {
 		 * 
 		 * 
 		 * ************************************************/
-		for(int i=0; i<N; i++) {
-			for(int j=0; j<D; j++) {
-				block[i][j] = 0;
-			}
-		}
-		for(int i=0; i<1; i++) {
-			for(int j=0; j<D; j++) {
-				sumHV[i][j] = 0;
-			}
-		}
-		
-		assignItemMemory(count, buffer, itemMemory);
-		//printf("Test");
-		createItemMemoryHV(D, iMHV);
-		
-		
-		for(int i=0; i<=count; i++) {			
-			
-			key = buffer[i];
-			circShift(N, D, block);
-			//printf("i %i ", i);
-			lookupItemMemory(D, iMHV, itemMemory, key, block); 	
-			
-			if (i >= N) {
-				int *temp = block[0];
-				int nGrams[1][D];
-				
-				//assigns nGrams to the first row of block
-				for(int j=0; j<1; j++) {
-					for(int k=0; k<D; k++) {
-						nGrams[j][k] = temp[k];
-					}
-				}
-				
-				
-				for(int j=1; j<N; j++) {
-					for(int k=0; k<1; k++) {
-						for(int l=0; l<D; l++) {
-							nGrams[k][l] = nGrams[k][l] * block[j][l];
-						}
-					}
-				}	
-				for(int row=0; row<1; row++) {
-					for(int col=0; col<D; col++) {
-						sumHV[row][col] = sumHV[row][col] + nGrams[row][col];
-					}
-				}
-			}
-		}
-		
-		for(int i=0; i<1; i++) {
-			for(int j=0; j<D; j++) {
-				printf("%i ", sumHV[i][j]);
-			}
-			printf("\n");
-		}
-		
-    }
+		 computeSumHV(D, N, sumHV, count, buffer);
 	
 	return 0;
 		
