@@ -5,57 +5,18 @@
 void perm(int D, int arr[]); //permutates an array
 void genRandomHV(int D, int randomHV[]); //generates random hypervector
 void circShift(int n, int d, int arr[][d]); //shifts the array circularly
-void removeChar(char *s, int c); //removes every occurence of a specific character from a string
-void assignItemMemory(int size, char buff[], char itemMemory[]); //assigns the 27 chracters into an array 
 void createItemMemoryHV(int D, int iMHV[][D]); //creates hypervectors for every single character in itemMemory
 void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D]); // sets the first row of block to the cooresponding randHV of key
 void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]);
+void buildLangHV(int N, int D);
 
 int main() {
 	//Declarations/initializations for computeSumHV
 	int N = 4;
 	int D = 10000;
-	int sumHV[D];
 	
-	//Creating langLabels
-	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
-	
-	char buffer[2000000]; //array for every c in .txt files
-	int length =  (sizeof langLabels)/(sizeof langLabels[0]); //size of langLabels
-	
-	//iterating through every file computingHV
-	for(int t=0; t<length; t++) {
-		//Creating the file address 
-		char fileAddress[29];
-		
-		sprintf(fileAddress, "%s%s%s", "./code/training_texts/", langLabels[t], ".txt");
-		
-		
-		//Opening the file address
-		FILE *fileID = fopen(fileAddress, "r"); 
-		
-		//Check to make sure the file can be opended
-		if (fileID == NULL) {
-			printf("Failed: File could not be opened.\n");
-			return 1;
-		}
-		
-		
-		//Compiles every character in the text document into array, buffer
-		int count=0;
-		
-		while(1) {
-			buffer[count] = fgetc(fileID);
-			if(feof(fileID)) {
-				break;
-			}
-			count++;	
-		}
-		fclose(fileID);
-		printf("Loaded training language file %s\n", fileAddress);
+	buildLangHV(N, D);
 
-		 computeSumHV(D, N, sumHV, count, buffer);
-	}
 	return 0;
 		
 }
@@ -115,23 +76,13 @@ void circShift(int n, int d, int arr[][d]) {
 		for(int j=0; j<d; j++) {
 			if (j == (d-1)) {
 				arr[i][0] = arr1[i][d-1];
-				printf("%i ", arr[i][0]);   //#this was during testing
+				//printf("%i ", arr[i][0]);   //#this was during testing
 			}
 			else {
 				arr[i][j+1] = arr1[i][j];
 			}
 		}
 	}
-}
-void removeChar(char *str, int c) {
-	int j, n = strlen(str);
-	for(int i=j=0; i<n; i++) {
-		if(str[i] != c) {
-			str[j++] = str[i];
-		}
-	}
-	str[j] = '\0';
-	
 }
 void createItemMemoryHV(int D, int iMHV[][D]) {
 	for(int i=0; i<27; i++) {
@@ -148,9 +99,7 @@ void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int blo
 		if (itemMemory[i] == key) {
 			for(int j=0; j<D; j++) {
 				block[0][j] = iMHV[i][j];
-				//printf("%i ", iMHV[0][j]);
 			}
-			//printf("\n");
 			break;
 		}
 	}	
@@ -179,7 +128,6 @@ void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]) {
 			
 		key = buffer[i];
 		circShift(N, D, block);
-		//printf("i %i ", i);
 		lookupItemMemory(D, iMHV, itemMemory, key, block); 	
 			
 		if (i >= N) {
@@ -203,9 +151,56 @@ void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]) {
 			}
 		}
 	}
-	/*
-	for(int i=0; i<D; i++) {
-		printf("%i ", sumHV[i]);
+}
+void buildLangHV(int N, int D) {
+	int sumHV[D];
+	
+	//Creating langLabels
+	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
+	int length =  (sizeof langLabels)/(sizeof langLabels[0]); //size of langLabels
+	char buffer[2000000]; //array for every c in .txt files
+	int langAM[length][D]; //assistive memory storage for testing
+	
+	//iterating through every file computingHV
+	for(int t=0; t<length; t++) {
+		//Creating the file address 
+		char fileAddress[29];
+		
+		sprintf(fileAddress, "%s%s%s", "./code/training_texts/", langLabels[t], ".txt");
+		
+		
+		//Opening the file address
+		FILE *fileID = fopen(fileAddress, "r"); 
+		
+		//Check to make sure the file can be opended
+		if (fileID == NULL) {
+			printf("Failed: File could not be opened.\n");
+			break;
+		}
+		
+		
+		//Compiles every character in the text document into array, buffer
+		int count=0;
+		
+		while(1) {
+			buffer[count] = fgetc(fileID);
+			if(feof(fileID)) {
+				break;
+			}
+			count++;	
+		}
+		fclose(fileID);
+		printf("Loaded training language file %s\n", fileAddress);
+
+		 computeSumHV(D, N, sumHV, count, buffer);
+		 
+		 //Uncomment to test that the void function works
+		 /*
+		 for(int i=0; i<D; i++) {
+			 langAM[t][i] = sumHV[i];
+			 printf("%i ", langAM[t][i]);
+		 }
+		 printf("\n");
+		 */
 	}
-	printf("\n");*/
 }
