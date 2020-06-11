@@ -43,7 +43,7 @@ def computeSumHV (buff, itemMemory, N, D):
 				nGrams = np.multiply(nGrams, block[i,:])
 			sumHV = np.add(sumHV, nGrams)
 			
-	
+
 	return itemMemory, sumHV
 
 def binarizeHV(v):
