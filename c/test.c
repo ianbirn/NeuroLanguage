@@ -11,9 +11,9 @@ void createItemMemoryHV(int D, int iMHV[][D]); //creates hypervectors for every 
 void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D]); // sets the first row of block to the cooresponding randHV of key
 void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]);
 void binarizeHV(int v[], int szofv);
-double norm(double a[], int n);
-double dotProduct(double a[], double b[], int n);
-double cosAngle(double a[], double b[], int n);
+double norm(int a[], int n);
+double dotProduct(int a[], int b[], int n);
+double cosAngle(int a[], int b[], int n);
 
 int main() {
 	int N = 4;
@@ -26,12 +26,12 @@ int main() {
 	int total = 0;
 	int correct = 0;
 	char buffer[500];
-	double testSumHV[D];
+	int testSumHV[D];
 	double maxAngle = -1;
 	double angle;
 	double accuracy;
 	char predicLang[4];
-	
+	int tmp[D];
 	double langAM[length][D];
 	
 	for(int i=0; i<length; i++) {
@@ -64,19 +64,23 @@ int main() {
 			buffer[count] = '\0';
 			fclose(fileID);
 			printf("Loaded file: %s\n", fileAddress);
-			printf("%s\n", buffer);
+			//printf("%s\n", buffer);
 			
 			computeSumHV (D, N, testSumHV, count, buffer);
 			binarizeHV(testSumHV, D);
 			
 			for(int j=0; j<D; j++) {
-				printf("%d ", testSumHV[j]);
+				//printf("%d ", testSumHV[j]);
 			}
 			printf("\n");
 			
 			for(int l=0; l<length; l++) {
-				double tmp[D] = langAM[l][D];
+				for (int j=0; j<D; j++) {
+					tmp[j] = langAM[l][j];
+					//printf("%i", tmp[j]);
+				}
 				angle = cosAngle(testSumHV, tmp, D);
+				//printf("%g\n", angle);
 				if (angle > maxAngle) {
 					maxAngle = angle;
 					sprintf(predicLang, "%s", langLabels[l]); //assigns predicLang to langLabels[l]
@@ -96,26 +100,27 @@ int main() {
 return 0;
 }
 
-double norm(double a[], int n) {
-	double sum=0;
+double norm(int a[], int n) {
+	int sum=0;
 	double norm=0;
 	for (int i=0; i<n; i++) {
 		sum += a[i] * a[i];
 	}
+	//sum = (double)sum;
 	sum = (double)sum;
 	norm = sqrt(sum);
 	return norm;
 }
 
-double dotProduct(double a[], double b[], int n) {
-	double product = 0;
+double dotProduct(int a[], int b[], int n) {
+	int product = 0;
 	for (int i=0; i<n; i++) {
 		product += a[i] * b[i];
 	}	
 	return (double)product;
 }
 
-double cosAngle(double a[], double b[], int n) {
+double cosAngle(int a[], int b[], int n) {
 	return dotProduct(a, b, n)/(norm(a, n)*norm(b, n));	
 }
 
