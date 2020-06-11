@@ -26,11 +26,20 @@ int main() {
 	int total = 0;
 	int correct = 0;
 	char buffer[500];
-	int testSumHV[D];
+	double testSumHV[D];
 	double maxAngle = -1;
 	double angle;
 	double accuracy;
 	char predicLang[4];
+	
+	double langAM[length][D];
+	
+	for(int i=0; i<length; i++) {
+		for(int j=0; j<D; j++) {
+			langAM[i][j] = 1;
+		}
+	}
+	
 	
 	for(int i=1; i<2; i++) {
 		for(int j=0; j<3; j++) {
@@ -66,7 +75,8 @@ int main() {
 			printf("\n");
 			
 			for(int l=0; l<length; l++) {
-				//angle = cosAngle();
+				double tmp[D] = langAM[l][D];
+				angle = cosAngle(testSumHV, tmp, D);
 				if (angle > maxAngle) {
 					maxAngle = angle;
 					sprintf(predicLang, "%s", langLabels[l]); //assigns predicLang to langLabels[l]
