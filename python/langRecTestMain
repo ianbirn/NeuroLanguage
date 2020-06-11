@@ -45,7 +45,7 @@ def computeSumHV (buff, itemMemory, N, D):
 		last = block[-1, range(D)]
 		block[1:, range(D)] = tmp
 		block[0, range(D)] = last
-		
+		del tmp, last
 		
 		itemMemory, block[0,:] = lookupItemMemory(itemMemory, key, D)
 		
