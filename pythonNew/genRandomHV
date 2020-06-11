@@ -1,6 +1,6 @@
 import numpy as np
 
-def genRandomHV(D):
+def genRandomHV(D): #D is int, create random hypervector
 	if D % 2:
 		print('Dimension is odd!!!')
 	else:
@@ -10,4 +10,35 @@ def genRandomHV(D):
 		randomHV[np.where(randomIndex >= D/2)] = -1
 	return randomHV
 	
+def lookupItemMemory(itemMem, key, D): #itemMem is dictionary, key is str, D is int
+	if key in itemMem:
+		ranHV = itemMem[key]
+	else:
+		itemMem[key] = genRandomHV(D)
+		ranHV = itemMem[key]
 
+	return itemMem, ranHV
+	
+def circshift1x1(arr, N, D): #takes block array and shifts everything down one and right one
+	#move everything to the right one
+	
+	tmp = np.array(arr[range(N), :-1])
+	last = arr[range(N), -1]
+	arr[range(N), 1:] = tmp
+	arr[range(N), 0] = last
+		
+	tmp = np.array(arr[:-1, range(D)])
+	last = arr[-1, range(D)]
+	arr[1:, range(D)] = tmp
+	arr[0, range(D)] = last
+	return arr 
+	
+#def computeSumHV (buff, itemMemory, N, D):
+	
+	
+
+if __name__ == '__main__':
+	block = np.array([(1, 2, 3, 4),(5, 6, 7, 8),(9, 10, 11, 12)])
+	print(block)
+	block = circshift1x1(block, 3, 4)
+	print(block)

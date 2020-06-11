@@ -34,7 +34,19 @@ def computeSumHV (buff, itemMemory, N, D):
 	for numItems in range(0, buff.size):
 		key = buff[numItems]
 		
-		block = np.roll(block, 1, [0,1])
+
+		tmp = np.array(block[range(N), :-1])
+		last = block[range(N), -1]
+		block[range(N), 1:] = tmp
+		block[range(N), 0] = last
+		
+
+		tmp = np.array(block[:-1, range(D)])
+		last = block[-1, range(D)]
+		block[1:, range(D)] = tmp
+		block[0, range(D)] = last
+		
+		
 		itemMemory, block[0,:] = lookupItemMemory(itemMemory, key, D)
 		
 		if numItems >= N:
