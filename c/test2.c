@@ -4,74 +4,55 @@
 #include <time.h>
 #include <math.h>
 
-int N = 4;
-int D = 100;
-
 void perm(int D, int arr[]); //permutates an array
 void genRandomHV(int D, int randomHV[]); //generates random hypervector
 void circShift(int n, int d, int arr[][d]); //shifts the array circularly
 void createItemMemoryHV(int D, int iMHV[][D]); //creates hypervectors for every single character in itemMemory
 void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D]); // sets the first row of block to the cooresponding randHV of key
-void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]); //computes HV for text
-void binarizeHV(int v[], int szofv); //normalizes vector
-double norm(int a[], int n); 
+void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]);
+void buildLangHV(int N, int D, int langAM[][D]);
+void binarizeHV(int v[], int szofv);
+double norm(int a[], int n);
 double dotProduct(int a[], int b[], int n);
-double cosAngle(int a[], int b[], int n); //measures distance between vectors
-double test(int N, int D, int langAM[][D]); //predicts languages
+double cosAngle(int a[], int b[], int n);
 
+int main() {
+	int N = 4;
+	int D = 10;
 
-int main () {
-	
-	double accuracy;
-	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
-	int length = (sizeof langLabels)/(sizeof langLabels[0]);
-	int langAM[length][D];
-	
-
-	for(int i=0; i<length; i++) {
-		for(int j=0; j<D; j++) {
-			langAM[i][j] = 1;
-		}
-	}
-	
-	accuracy = test(N, D, langAM);
-	printf("%f\n", accuracy);
-	
-	return 0;
-}
-	
-
-double test(int N, int D, int langAM[][D]) {
 	
 	char actualLabel[][3] = {"af", "bg", "cs", "da", "nl", "de", "en", "et", "fi", "fr", "el", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
+	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
 	
 	int length = (sizeof actualLabel)/(sizeof actualLabel[0]);
+	
+	int langAM[5][D]; //assistive memory storage for testing
+	buildLangHV(N, D, langAM);
+	
+	int total = 0;
+	int correct = 0;
 	char buffer[500];
-	char predicLang[4];
-	
 	int testSumHV[D];
-	int tmp[D];
-	
 	double maxAngle = -1;
 	double angle;
 	double accuracy;
-	double total = 0;
-	double correct = 0;
-
+	char predicLang[4];
+	int tmp[D];
 	
-	for(int i=1; i<2; i++) {	//loop to go through the actualLabels
-		for(int j=0; j<100; j++) {	//loop to go through the number in the file address
-			char fileAddress[100];	
+	for(int i=1; i<2; i++) {
+		for(int j=1; j<6; j++) {
+			char fileAddress[50];
 			
-			sprintf(fileAddress, "%s%s%s%d%s", "/home/pi/Downloads/testing_texts/", actualLabel[i], "_", j, "_p.txt");
+			sprintf(fileAddress, "%s%s%s%d%s", "./code/testing_texts/", actualLabel[i], "_", j, "_p.txt");
+			//printf("%s ", fileAddress);
 			
-			FILE *fileID = fopen(fileAddress, "r");		//opening file
+			FILE *fileID = fopen(fileAddress, "r");
 			if(fileID == NULL) {
-				printf("Error opening file!\n");	
-				return 1;
+				printf("Error opening file!\n");
+				break;
 			}
 		
-			int count = 0;							//reading the file
+			int count = 0;
 			while(1) {
 				buffer[count] = fgetc(fileID);
 				if(feof(fileID)) {
@@ -79,50 +60,56 @@ double test(int N, int D, int langAM[][D]) {
 				}
 				count++;
 			}
-			buffer[count] = '\0';	//ending string, closing file
+			buffer[count] = '\0';
 			fclose(fileID);
 			printf("Loaded file: %s\n", fileAddress);
+			//printf("%s\n", buffer);
 			
-			computeSumHV (D, N, testSumHV, count, buffer);	//assigning the file with a HV
-			binarizeHV(testSumHV, D);						// binarizing the HV
-
-			for(int l=0; l<length; l++) {				//loop to go through the languages
-				for(int t=0; t<D; t++) {			//loop to assign tmp to test the correct
-					tmp[t] = langAM[l][t];				//language HV
+			computeSumHV (D, N, testSumHV, count, buffer);
+			binarizeHV(testSumHV, D);
+			
+			for(int l=0; l<5; l++) {
+				for (int t=0; t<D; t++) {
+					tmp[t] = langAM[l][t];
+					//printf("%i", tmp[t]);
 				}
-				
-				angle = cosAngle(testSumHV, tmp, D);	//measure distance
+				angle = cosAngle(testSumHV, tmp, D);
+				//printf("%g\n", angle);
 				if (angle > maxAngle) {
 					maxAngle = angle;
-					sprintf(predicLang, "%s", actualLabel[l]); //assigns predicLang to the most similar language
+					sprintf(predicLang, "%s", langLabels[l]); //assigns predicLang to langLabels[l]
 				}
+				
 			}
-			
-			if(predicLang == actualLabel[i]) {	//test for correctness
+			//printf("%s\n", predicLang);
+			/*if(predicLang == actualLabel[?]) {
 				correct = correct +1;
-			}			
+			}
+			else {
+				total = total +1;
+			} */	
 		}	
-		total = total +1;
 	}
 	
 	accuracy = correct / total;
 	
-return accuracy;
+return 0;
 }
 
 double norm(int a[], int n) {
-	double sum=0;
+	int sum=0;
 	double norm=0;
 	for (int i=0; i<n; i++) {
 		sum += a[i] * a[i];
 	}
+	//sum = (double)sum;
 	sum = (double)sum;
 	norm = sqrt(sum);
 	return norm;
 }
 
 double dotProduct(int a[], int b[], int n) {
-	double product = 0;
+	int product = 0;
 	for (int i=0; i<n; i++) {
 		product += a[i] * b[i];
 	}	
@@ -276,4 +263,54 @@ void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int blo
 			break;
 		}
 	}	
+}
+void buildLangHV(int N, int D, int langAM[][D]) {
+	int sumHV[D];
+	
+	//Creating langLabels
+	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
+	int length =  (sizeof langLabels)/(sizeof langLabels[0]); //size of langLabels
+	char buffer[2000000]; //array for every c in .txt files
+	
+	//iterating through every file computingHV
+	for(int t=0; t<5; t++) {
+		//Creating the file address 
+		char fileAddress[29];
+		
+		sprintf(fileAddress, "%s%s%s", "./code/training_texts/", langLabels[t], ".txt");
+		
+		
+		//Opening the file address
+		FILE *fileID = fopen(fileAddress, "r"); 
+		
+		//Check to make sure the file can be opended
+		if (fileID == NULL) {
+			printf("Failed: File could not be opened.\n");
+			break;
+		}
+		
+		
+		//Compiles every character in the text document into array, buffer
+		int count=0;
+		
+		while(1) {
+			buffer[count] = fgetc(fileID);
+			if(feof(fileID)) {
+				break;
+			}
+			count++;	
+		}
+		fclose(fileID);
+		printf("Loaded training language file %s\n", fileAddress);
+
+		 computeSumHV(D, N, sumHV, count, buffer);
+		 
+		 //Uncomment to test that the void function works
+		 
+		 for(int i=0; i<D; i++) {
+			 langAM[t][i] = sumHV[i];
+			 //printf("%i ", langAM[t][i]);
+		 }
+		 //printf("\n");
+	}
 }
