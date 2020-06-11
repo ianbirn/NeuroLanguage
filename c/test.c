@@ -30,13 +30,13 @@ int main() {
 	double maxAngle = -1;
 	double angle;
 	double accuracy;
-	char predicLang[length];
+	char predicLang[4];
 	
 	for(int i=1; i<2; i++) {
 		for(int j=0; j<3; j++) {
 			char fileAddress[50];
 			
-			sprintf(fileAddress, "%s%s%s%d%s", "/home/pi/Downloads/testing_texts/", actualLabel[i], "_", j, "_p.txt");
+			sprintf(fileAddress, "%s%s%s%d%s", "./code/testing_texts/", actualLabel[i], "_", j, "_p.txt");
 			
 			FILE *fileID = fopen(fileAddress, "r");
 			if(fileID == NULL) {
@@ -69,7 +69,7 @@ int main() {
 				//angle = cosAngle();
 				if (angle > maxAngle) {
 					maxAngle = angle;
-					predicLang[l] = langLabels[l];
+					sprintf(predicLang, "%s", langLabels[l]); //assigns predicLang to langLabels[l]
 				}
 			}
 			/*if(predicLang == actualLabel[?]) {
