@@ -4,56 +4,74 @@
 #include <time.h>
 #include <math.h>
 
+int N = 4;
+int D = 100;
+
 void perm(int D, int arr[]); //permutates an array
 void genRandomHV(int D, int randomHV[]); //generates random hypervector
 void circShift(int n, int d, int arr[][d]); //shifts the array circularly
 void createItemMemoryHV(int D, int iMHV[][D]); //creates hypervectors for every single character in itemMemory
 void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D]); // sets the first row of block to the cooresponding randHV of key
-void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]);
-void binarizeHV(int v[], int szofv);
-double norm(int a[], int n);
+void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]); //computes HV for text
+void binarizeHV(int v[], int szofv); //normalizes vector
+double norm(int a[], int n); 
 double dotProduct(int a[], int b[], int n);
-double cosAngle(int a[], int b[], int n);
+double cosAngle(int a[], int b[], int n); //measures distance between vectors
+double test(int N, int D, int langAM[][D]); //predicts languages
 
-int main() {
-	int N = 4;
-	int D = 100;
+
+int main () {
 	
-	char actualLabel[][3] = {"af", "bg", "cs", "da", "nl", "de", "en", "et", "fi", "fr", "el", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
-	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
-
-	int length = (sizeof actualLabel)/(sizeof actualLabel[0]);
-	int total = 0;
-	int correct = 0;
-	char buffer[500];
-	int testSumHV[D];
-	double maxAngle = -1;
-	double angle;
 	double accuracy;
-	char predicLang[4];
-	int tmp[D];
-	double langAM[length][D];
+	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
+	int length = (sizeof langLabels)/(sizeof langLabels[0]);
+	int langAM[length][D];
 	
+
 	for(int i=0; i<length; i++) {
 		for(int j=0; j<D; j++) {
 			langAM[i][j] = 1;
 		}
 	}
 	
+	accuracy = test(N, D, langAM);
+	printf("%f\n", accuracy);
 	
-	for(int i=1; i<2; i++) {
-		for(int j=0; j<3; j++) {
-			char fileAddress[50];
+	return 0;
+}
+	
+
+double test(int N, int D, int langAM[][D]) {
+	
+	char actualLabel[][3] = {"af", "bg", "cs", "da", "nl", "de", "en", "et", "fi", "fr", "el", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
+	
+	int length = (sizeof actualLabel)/(sizeof actualLabel[0]);
+	char buffer[500];
+	char predicLang[4];
+	
+	int testSumHV[D];
+	int tmp[D];
+	
+	double maxAngle = -1;
+	double angle;
+	double accuracy;
+	double total = 0;
+	double correct = 0;
+
+	
+	for(int i=1; i<2; i++) {	//loop to go through the actualLabels
+		for(int j=0; j<100; j++) {	//loop to go through the number in the file address
+			char fileAddress[100];	
 			
-			sprintf(fileAddress, "%s%s%s%d%s", "./code/testing_texts/", actualLabel[i], "_", j, "_p.txt");
+			sprintf(fileAddress, "%s%s%s%d%s", "/home/pi/Downloads/testing_texts/", actualLabel[i], "_", j, "_p.txt");
 			
-			FILE *fileID = fopen(fileAddress, "r");
+			FILE *fileID = fopen(fileAddress, "r");		//opening file
 			if(fileID == NULL) {
-				printf("Error opening file!\n");
+				printf("Error opening file!\n");	
 				return 1;
 			}
 		
-			int count = 0;
+			int count = 0;							//reading the file
 			while(1) {
 				buffer[count] = fgetc(fileID);
 				if(feof(fileID)) {
@@ -61,59 +79,50 @@ int main() {
 				}
 				count++;
 			}
-			buffer[count] = '\0';
+			buffer[count] = '\0';	//ending string, closing file
 			fclose(fileID);
 			printf("Loaded file: %s\n", fileAddress);
-			//printf("%s\n", buffer);
 			
-			computeSumHV (D, N, testSumHV, count, buffer);
-			binarizeHV(testSumHV, D);
-			
-			for(int j=0; j<D; j++) {
-				//printf("%d ", testSumHV[j]);
-			}
-			printf("\n");
-			
-			for(int l=0; l<length; l++) {
-				for (int j=0; j<D; j++) {
-					tmp[j] = langAM[l][j];
-					//printf("%i", tmp[j]);
+			computeSumHV (D, N, testSumHV, count, buffer);	//assigning the file with a HV
+			binarizeHV(testSumHV, D);						// binarizing the HV
+
+			for(int l=0; l<length; l++) {				//loop to go through the languages
+				for(int t=0; t<D; t++) {			//loop to assign tmp to test the correct
+					tmp[t] = langAM[l][t];				//language HV
 				}
-				angle = cosAngle(testSumHV, tmp, D);
-				//printf("%g\n", angle);
+				
+				angle = cosAngle(testSumHV, tmp, D);	//measure distance
 				if (angle > maxAngle) {
 					maxAngle = angle;
-					sprintf(predicLang, "%s", langLabels[l]); //assigns predicLang to langLabels[l]
+					sprintf(predicLang, "%s", actualLabel[l]); //assigns predicLang to the most similar language
 				}
 			}
-			/*if(predicLang == actualLabel[?]) {
+			
+			if(predicLang == actualLabel[i]) {	//test for correctness
 				correct = correct +1;
-			}
-			else {
-				total = total +1;
-			} */	
+			}			
 		}	
+		total = total +1;
 	}
 	
 	accuracy = correct / total;
 	
-return 0;
+return accuracy;
 }
 
 double norm(int a[], int n) {
-	int sum=0;
+	double sum=0;
 	double norm=0;
 	for (int i=0; i<n; i++) {
 		sum += a[i] * a[i];
 	}
-	//sum = (double)sum;
 	sum = (double)sum;
 	norm = sqrt(sum);
 	return norm;
 }
 
 double dotProduct(int a[], int b[], int n) {
-	int product = 0;
+	double product = 0;
 	for (int i=0; i<n; i++) {
 		product += a[i] * b[i];
 	}	
@@ -155,7 +164,7 @@ void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]) {
 	createItemMemoryHV(D, iMHV);
 	
 	
-	for(int i=0; i<=8; i++) {			
+	for(int i=0; i<=count; i++) {			
 			
 		key = buffer[i];
 		circShift(N, D, block);
