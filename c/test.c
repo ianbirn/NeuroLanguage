@@ -59,7 +59,7 @@ double test(int N, int D, int langAM[][D]) {
 	double correct = 0;
 
 	
-	for(int i=1; i<length; i++) {	//loop to go through the actualLabels
+	for(int i=1; i<2; i++) {	//loop to go through the actualLabels
 		for(int j=0; j<100; j++) {	//loop to go through the number in the file address
 			char fileAddress[100];	
 			
@@ -87,8 +87,8 @@ double test(int N, int D, int langAM[][D]) {
 			binarizeHV(testSumHV, D);						// binarizing the HV
 
 			for(int l=0; l<length; l++) {				//loop to go through the languages
-				for(int j=0; j<D; j++) {			//loop to assign tmp to test the correct
-					tmp[D] = langAM[l][j];				//language HV
+				for(int t=0; t<D; t++) {			//loop to assign tmp to test the correct
+					tmp[t] = langAM[l][t];				//language HV
 				}
 				
 				angle = cosAngle(testSumHV, tmp, D);	//measure distance
