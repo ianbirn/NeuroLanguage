@@ -1,0 +1,136 @@
+import numpy as np
+import os
+import gc
+import objgraph
+
+def genRandomHV (D):
+	if D % 2:
+		print('dimension is odd!')
+	else:
+		randomIndex = np.random.permutation(D)
+		randomHV = np.zeros((1, D))
+		half = D/2
+		randomHV[0, np.where(randomIndex < half)] = 1
+		randomHV[0, np.where(randomIndex >= half)] = -1
+	return randomHV
+
+def lookupItemMemory(itemMemory, key, D):
+	if key in itemMemory:
+		randomHV = itemMemory[key]
+	else:
+		itemMemory[key] = genRandomHV(D)
+		randomHV = itemMemory[key]
+	
+	return itemMemory, randomHV
+
+def computeSumHV (buff, itemMemory, N, D):
+	#init
+	block = np.zeros((N, D))
+	sumHV = np.zeros((1, D))
+	
+	for numItems in range(0, buff.size):
+		key = buff[numItems]
+		
+		block = np.roll(block, 1, [0,1])
+		itemMemory, block[0,:] = lookupItemMemory(itemMemory, key, D)
+		
+		if numItems >= N:
+			nGrams = np.array(block[1,:])
+			for i in range(2,N):
+				nGrams = np.multiply(nGrams, block[i,:])
+			sumHV = np.add(sumHV, nGrams)
+			
+	
+	return itemMemory, sumHV
+
+def binarizeHV(v):
+	threshold = 0
+	vsize = v.size
+	for i in range(0,vsize):
+		if v[0,i] > threshold:
+			v[0,i] = 1
+		else:
+			v[0,i] = -1
+	return v
+
+def binarizeLanguageHV (langAM):
+	langLabels = ['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe']
+	langLabels = np.array(langLabels)
+	for j in range(0,langLabels.size): 
+		v = langAM[langLabels[j]]
+		langAM[langLabels[j]] = binarizeHV(v)
+	
+	return langAM
+
+def buildLanguageHV (N, D):
+	iM = {}
+	langAM = {}
+	langLabels = ['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe']
+	langLabels = np.array(langLabels)
+	for i in range(0,langLabels.size):
+		fileAddress = '../training_texts/' + langLabels[i] + '.txt'
+		fileID = open(fileAddress, 'r')
+		fileSize = 0
+		tBuff = []
+		for line in fileID:
+			tBuff.append(line)
+		buff = np.array(tBuff)
+		fileID.close()
+		print('loaded the file ' + fileAddress)
+		
+		iM, langHV = computeSumHV(buff, iM, N, D)
+		langAM[langLabels[i]] = langHV
+		
+		objgraph.show_most_common_types()
+		
+		
+	return iM, langAM
+	
+def test (iM, langAM, N, D):
+	total = 0
+	correct = 0
+	langMap = {}
+	langMap ['af'] = 'afr'
+	
+	fileList = 'testing_texts/.'
+	fileAddress = 'testing_texts/'
+	for (root, dirs, files) in os.walk(fileList, topdown=False):
+		for name in files:
+			actualLabel = name[0:2]
+			tBuff=[]
+			fileID = open(fileAddress + name, 'r')
+			for line in fileID:
+				tBuff.append(line)
+			buff = np.array(tBuff)
+			fileID.close()
+			print('opened test file' + name)
+			
+			iMn, textHV = computeSumHV(buff, iM, N, D)
+			textHV = binarizeHV(textHV)
+			
+			if np.not_equal(iM, iMn):
+				print('-------NEW UNSEEN ITEM IN TEST FILE-------')
+				break
+			#else:
+				# maxAngle = -1
+				# angle = cosAngle(langAM[langMap['af']], textHV)
+				# if angle > maxAngle:
+					# maxAngle = angle
+					# #predicLang = 
+					
+	
+	accuracy = correct / total
+	return accuracy
+		
+
+if __name__ == '__main__':
+	D = 10000
+	N = 4
+	iMem={}
+	languageAM={}
+	iMem, languageAM = buildLanguageHV(N, D)
+	
+	#test(iMem, languageAM, N, D)
+	
+	#print(iMem)
+	#print(languageAM)
