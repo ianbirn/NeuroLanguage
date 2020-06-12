@@ -3,6 +3,9 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <unistd.h>
 
 void perm(int D, int arr[]); //permutates an array
 void genRandomHV(int D, int randomHV[]); //generates random hypervector
@@ -16,10 +19,11 @@ double norm(int a[], int n);
 double dotProduct(int a[], int b[], int n);
 double cosAngle(int a[], int b[], int n);
 
-int main() {
+int main(int argc, char *argv[]) {
 	int N = 4;
 	int D = 10;
 
+	int index=0;
 	
 	char actualLabel[][3] = {"af", "bg", "cs", "da", "nl", "de", "en", "et", "fi", "fr", "el", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
 	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
@@ -29,70 +33,61 @@ int main() {
 	int langAM[5][D]; //assistive memory storage for testing
 	buildLangHV(N, D, langAM);
 	
-	int total = 0;
-	int correct = 0;
-	char buffer[500];
+	char buffer[10000];
 	int testSumHV[D];
-	double maxAngle = -1;
-	double angle;
-	double accuracy;
-	char predicLang[4];
-	int tmp[D];
 	
-	for(int i=1; i<2; i++) {
-		for(int j=1; j<6; j++) {
-			char fileAddress[50];
-			
-			sprintf(fileAddress, "%s%s%s%d%s", "./code/testing_texts/", actualLabel[i], "_", j, "_p.txt");
-			//printf("%s ", fileAddress);
-			
-			FILE *fileID = fopen(fileAddress, "r");
-			if(fileID == NULL) {
-				printf("Error opening file!\n");
+	
+	DIR *dir;
+	struct dirent *d;
+    FILE *fileID;
+    
+    dir = opendir("./code/testing_texts");
+	
+    if (dir == NULL) {
+        printf("Failed: Directory could not be openned.\n");
+        exit(1);
+    }
+    
+    while((d=readdir(dir)) != NULL) {
+        char fileAddress[15];
+        
+        //To ignore parent directory print
+        if (!strcmp (d->d_name, "."))
+            continue;
+        if (!strcmp (d->d_name, ".."))    
+            continue;
+        
+        sprintf(fileAddress, "%s%s", "./code/testing_texts/", d->d_name);
+        
+        fileID = fopen(fileAddress, "r"); 
+        
+        if (fileID == NULL) {
+            printf("Failed: File could not be openned.\n");
+            return 1;
+        }
+        
+        int count=0;
+		while(1) {
+			buffer[count] = fgetc(fileID);
+			if(feof(fileID)) {
 				break;
 			}
-		
-			int count = 0;
-			while(1) {
-				buffer[count] = fgetc(fileID);
-				if(feof(fileID)) {
-					break;
-				}
-				count++;
-			}
-			buffer[count] = '\0';
-			fclose(fileID);
-			printf("Loaded file: %s\n", fileAddress);
-			//printf("%s\n", buffer);
-			
-			computeSumHV (D, N, testSumHV, count, buffer);
-			binarizeHV(testSumHV, D);
-			
-			for(int l=0; l<5; l++) {
-				for (int t=0; t<D; t++) {
-					tmp[t] = langAM[l][t];
-					//printf("%i", tmp[t]);
-				}
-				angle = cosAngle(testSumHV, tmp, D);
-				//printf("%g\n", angle);
-				if (angle > maxAngle) {
-					maxAngle = angle;
-					sprintf(predicLang, "%s", langLabels[l]); //assigns predicLang to langLabels[l]
-				}
-				
-			}
-			//printf("%s\n", predicLang);
-			/*if(predicLang == actualLabel[?]) {
-				correct = correct +1;
-			}
-			else {
-				total = total +1;
-			} */	
-		}	
-	}
-	
-	accuracy = correct / total;
-	
+			count++;
+		}
+		buffer[count] = '\0';	//ending string, closing file
+        
+        
+        fclose(fileID);
+        printf("Loaded: %s ", fileAddress);
+        
+        
+        //computeSumHV (D, N, testSumHV, count, buffer);
+        printf("%i\n", index);
+        index++;
+        
+    }
+    
+    closedir(dir);
 return 0;
 }
 
