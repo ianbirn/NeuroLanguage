@@ -36,7 +36,7 @@ int main () {
 	}
 	
 	accuracy = test(N, D, langAM);
-	printf("%f\n", accuracy);
+	printf("Accuracy: %f\n", accuracy);
 	
 	return 0;
 }
@@ -44,28 +44,32 @@ int main () {
 
 double test(int N, int D, int langAM[][D]) {
 	
-	double amount = 0;
-	
 	char actualLabel[][3] = {"af", "bg", "cs", "da", "nl", "de", "en", "et", "fi", "fr", "el", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
-	
-	int length = (sizeof actualLabel)/(sizeof actualLabel[0]);
+		
 	char buffer[500000];
 	char predicLang[4];
+	char dirAddress[] = "/home/pi/Downloads/testing_texts";
+	char tmpLabel[3];
 	
+	int lengthAL = (sizeof actualLabel)/(sizeof actualLabel[0]);
+	int lengthD = (sizeof dirAddress)/(sizeof dirAddress[0]);
+
 	int testSumHV[D];
 	int tmp[D];
 	
 	double maxAngle = -1;
 	double angle;
-	double accuracy;
+	double accuracy = 0;
 	double total = 0;
 	double correct = 0;
+	
+	int amount = 0;
 	
 	DIR *dir;
 	struct dirent *d;
 	FILE *fileID;
 	
-	dir = opendir("/home/pi/Downloads/tempTesting_texts");
+	dir = opendir(dirAddress);
 
 	if(dir == NULL) {
 		printf("error unable to open directory\n");
@@ -73,7 +77,7 @@ double test(int N, int D, int langAM[][D]) {
 	}
 	
 	while((d = readdir(dir)) != NULL)	{
-
+		
 		char fileAddress[300];	
 		
 		if(!strcmp (d->d_name, "."))
@@ -81,7 +85,7 @@ double test(int N, int D, int langAM[][D]) {
 		if(!strcmp (d->d_name, ".."))
 			continue;
 		
-		sprintf(fileAddress, "%s%s", "/home/pi/Downloads/tempTesting_texts/", d->d_name);
+		sprintf(fileAddress, "%s%s", "/home/pi/Downloads/testing_texts/", d->d_name);
 		
 		fileID = fopen(fileAddress, "r");		//opening file
 		if(fileID == NULL) {
@@ -103,39 +107,36 @@ double test(int N, int D, int langAM[][D]) {
 		printf("Loaded file: %s\n", fileAddress);
 		
 		computeSumHV (D, N, testSumHV, count, buffer);	//assigning the file with a HV
-		binarizeHV(testSumHV, D);	
-							// binarizing the HV
-		for(int k=0; k<D; k++) {
-			printf("%d ", testSumHV[k]);
-		}
-		printf("\n");
+		binarizeHV(testSumHV, D);		// binarizing the HV
 
-		for(int l=0; l<length; l++) {				//loop to go through the languages
+		for(int l=0; l<lengthAL; l++) {				//loop to go through the languages
 			for(int t=0; t<D; t++) {			//loop to assign tmp to test the correct
 				tmp[t] = langAM[l][t];				//language HV
 			}
 			
 			angle = cosAngle(testSumHV, tmp, D);	//measure distance
-			printf("angle = %f\n", angle);
 			if (angle > maxAngle) {
 				maxAngle = angle;
 				sprintf(predicLang, "%s", actualLabel[l]); //assigns predicLang to the most similar language
 			}
 		}
 		
+		sprintf(tmpLabel, "%c%c", fileAddress[lengthD], fileAddress[lengthD+1]);
+		printf("tmpLabel: %s\n", tmpLabel);
 		
-	//	if(predicLang == actualLabel[w]) {	//test for correctness
-		//	correct = correct +1;
-	//	}		
 		
-	//	total = total +1;
+		if(predicLang == tmpLabel) {	//test for correctness
+			correct = correct +1;
+		}		
+		
+		total = total +1;
 		amount = amount +1;
 	} // end  while loop
+	printf("Amount of files opened: %d\n", amount);
 	closedir(dir);
-	//accuracy = correct / total;
-	printf("amount of files: %f", amount);
-	
-return 1;
+	accuracy = correct / total;
+
+return accuracy;
 }
 
 double norm(int a[], int n) {
