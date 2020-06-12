@@ -3,6 +3,8 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <dirent.h>
+#include <sys/types.h>
 
 int N = 4;
 int D = 100;
@@ -26,7 +28,6 @@ int main () {
 	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
 	int length = (sizeof langLabels)/(sizeof langLabels[0]);
 	int langAM[length][D];
-	
 
 	for(int i=0; i<length; i++) {
 		for(int j=0; j<D; j++) {
@@ -43,10 +44,12 @@ int main () {
 
 double test(int N, int D, int langAM[][D]) {
 	
+	double amount = 0;
+	
 	char actualLabel[][3] = {"af", "bg", "cs", "da", "nl", "de", "en", "et", "fi", "fr", "el", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
 	
 	int length = (sizeof actualLabel)/(sizeof actualLabel[0]);
-	char buffer[500];
+	char buffer[500000];
 	char predicLang[4];
 	
 	int testSumHV[D];
@@ -57,57 +60,82 @@ double test(int N, int D, int langAM[][D]) {
 	double accuracy;
 	double total = 0;
 	double correct = 0;
-
 	
-	for(int i=1; i<2; i++) {	//loop to go through the actualLabels
-		for(int j=0; j<100; j++) {	//loop to go through the number in the file address
-			char fileAddress[100];	
-			
-			sprintf(fileAddress, "%s%s%s%d%s", "/home/pi/Downloads/testing_texts/", actualLabel[i], "_", j, "_p.txt");
-			
-			FILE *fileID = fopen(fileAddress, "r");		//opening file
-			if(fileID == NULL) {
-				printf("Error opening file!\n");	
-				return 1;
-			}
-		
-			int count = 0;							//reading the file
-			while(1) {
-				buffer[count] = fgetc(fileID);
-				if(feof(fileID)) {
-					break;
-				}
-				count++;
-			}
-			buffer[count] = '\0';	//ending string, closing file
-			fclose(fileID);
-			printf("Loaded file: %s\n", fileAddress);
-			
-			computeSumHV (D, N, testSumHV, count, buffer);	//assigning the file with a HV
-			binarizeHV(testSumHV, D);						// binarizing the HV
+	DIR *dir;
+	struct dirent *d;
+	FILE *fileID;
+	
+	dir = opendir("/home/pi/Downloads/tempTesting_texts");
 
-			for(int l=0; l<length; l++) {				//loop to go through the languages
-				for(int t=0; t<D; t++) {			//loop to assign tmp to test the correct
-					tmp[t] = langAM[l][t];				//language HV
-				}
-				
-				angle = cosAngle(testSumHV, tmp, D);	//measure distance
-				if (angle > maxAngle) {
-					maxAngle = angle;
-					sprintf(predicLang, "%s", actualLabel[l]); //assigns predicLang to the most similar language
-				}
-			}
-			
-			if(predicLang == actualLabel[i]) {	//test for correctness
-				correct = correct +1;
-			}			
-		}	
-		total = total +1;
+	if(dir == NULL) {
+		printf("error unable to open directory\n");
+		exit(1);
 	}
 	
-	accuracy = correct / total;
+	while((d = readdir(dir)) != NULL)	{
+
+		char fileAddress[300];	
+		
+		if(!strcmp (d->d_name, "."))
+			continue;
+		if(!strcmp (d->d_name, ".."))
+			continue;
+		
+		sprintf(fileAddress, "%s%s", "/home/pi/Downloads/tempTesting_texts/", d->d_name);
+		
+		fileID = fopen(fileAddress, "r");		//opening file
+		if(fileID == NULL) {
+			printf("Error opening file!\n");	
+			printf("%s\n", fileAddress);
+			return 1;
+		}
 	
-return accuracy;
+		int count = 0;							//reading the file
+		while(1) {
+			buffer[count] = fgetc(fileID);
+			if(feof(fileID)) {
+				break;
+			}
+			count++;
+		}
+		buffer[count] = '\0';	//ending string, closing file
+		fclose(fileID);
+		printf("Loaded file: %s\n", fileAddress);
+		
+		computeSumHV (D, N, testSumHV, count, buffer);	//assigning the file with a HV
+		binarizeHV(testSumHV, D);	
+							// binarizing the HV
+		for(int k=0; k<D; k++) {
+			printf("%d ", testSumHV[k]);
+		}
+		printf("\n");
+
+		for(int l=0; l<length; l++) {				//loop to go through the languages
+			for(int t=0; t<D; t++) {			//loop to assign tmp to test the correct
+				tmp[t] = langAM[l][t];				//language HV
+			}
+			
+			angle = cosAngle(testSumHV, tmp, D);	//measure distance
+			printf("angle = %f\n", angle);
+			if (angle > maxAngle) {
+				maxAngle = angle;
+				sprintf(predicLang, "%s", actualLabel[l]); //assigns predicLang to the most similar language
+			}
+		}
+		
+		
+	//	if(predicLang == actualLabel[w]) {	//test for correctness
+		//	correct = correct +1;
+	//	}		
+		
+	//	total = total +1;
+		amount = amount +1;
+	} // end  while loop
+	closedir(dir);
+	//accuracy = correct / total;
+	printf("amount of files: %f", amount);
+	
+return 1;
 }
 
 double norm(int a[], int n) {
