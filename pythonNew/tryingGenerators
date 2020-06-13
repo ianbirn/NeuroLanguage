@@ -1,4 +1,7 @@
 import numpy as np
+import os
+import glob
+import fnmatch
 
 def readLabels(langLabels): #will read a training file and yield the buffer, looping thru langLabels
 	i = 0
@@ -15,6 +18,17 @@ def getKeys(arr): #given numpy arr, scan each letter one by one and yield it
 	for line in arr:
 		for char in line:
 			yield char
+
+def readTestFiles(path):
+	pattern = '*.txt'
+	for textFile in os.listdir(path):
+		if fnmatch.fnmatch(textFile, pattern):
+			buff=[]
+			for row in open(os.path.join(path, textFile)):
+				buff.append(row)
+			yield np.array(buff, dtype='str'), textFile
+	
+
 
 
 
@@ -57,6 +71,22 @@ def computeSumHV(text, itemMemory, N, D):
 		i+=1
 	return itemMemory, sumHV
 
+
+def binarizeHV(v):
+	threshold = 0
+	vsize = v.size
+	for i in range(0,vsize):
+		if v[0,i] > threshold:
+			v[0,i] = 1
+		else:
+			v[0,i] = -1
+	return v
+
+def cosAngle(u, v):
+	cos = np.dot(u[0,:], v[0,:]) / (np.linalg.norm(u) * np.linalg.norm(v))
+	return cos
+
+
 if __name__ == '__main__':
 	iM = {}
 	langAM = {}
@@ -70,3 +100,57 @@ if __name__ == '__main__':
 		
 	print(iM)
 	print(langAM)
+	
+	#testing the function
+	langMap = {}
+	langMap ['af'] = 'afr'
+	langMap ['bg'] = 'bul'
+	langMap ['cs'] = 'ces'
+	langMap ['da'] = 'dan'
+	langMap ['nl'] = 'nld'
+	langMap ['de'] = 'deu'
+	langMap ['en'] = 'eng'
+	langMap ['et'] = 'est'
+	langMap ['fi'] = 'fin'
+	langMap ['fr'] = 'fra'
+	langMap ['el'] = 'ell'
+	langMap ['hu'] = 'hun'
+	langMap ['it'] = 'ita'
+	langMap ['lv'] = 'lav'
+	langMap ['lt'] = 'lit'
+	langMap ['pl'] = 'pol'
+	langMap ['pt'] = 'por'
+	langMap ['ro'] = 'ron'
+	langMap ['sk'] = 'slk'
+	langMap ['sl'] = 'slv'
+	langMap ['es'] = 'spa'
+	langMap ['sv'] = 'swe'
+	total = 0
+	correct = 0
+	count=0
+	for text, name in readTestFiles('../testing_texts/'):
+		print('reading ' + str(name))
+		actualLabel = name[0:2]
+		
+		iMn, textHV = computeSumHV(text, iM, N, D)
+		textHV = binarizeHV(textHV)
+
+		if np.not_equal(iM, iMn):
+			print("NEW UNSEEN ITEM IN TEST FILE")
+			break
+		else:
+			maxAngle = -1
+			for label in langLabels:
+				angle = cosAngle(langAM[label], textHV)
+				if angle > maxAngle:
+					maxAngle = angle
+					predicLang = label
+			if predicLang == langMap[actualLabel]:
+				correct+=1
+			else:
+				print(str(langMap[actualLabel] + '--->' + predicLang))
+			total+=1
+		
+		accuracy = correct / total
+		
+	print(accuracy * 100)
