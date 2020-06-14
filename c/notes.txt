@@ -1,0 +1,11 @@
+****Trial 1****
+accuracy = 4.570%
+time: 1hr 25mn 54s
+
+added back assingItemMemory function to better compare to python/matlab applications;
+seemed to make little to no change;
+
+compared with matlab findings to see if cosAngle function was working properly;
+the two appeared very similar as if working the same(they would never be equal since it HVs are random each time);
+
+going to print the resulting vector from matlab from training and a testing file and apply those into test() manually to see if it returns right answer;
