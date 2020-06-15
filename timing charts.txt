@@ -20,3 +20,20 @@ Ben - total time = 6024.806 seconds
 	OS:	Windows 10 Pro x64 version 1903
 	CPU:	Intel(R) Core(TM) i7-6820HQ CPU @ 2.70GHz
 	RAM:	8.00 GB
+
+-------------------------------------------------------------------
+		Python Timing
+-------------------------------------------------------------------
+PI SPECS
+	OS: Raspbian GNU/Linux 10 (buster)
+	CPU: Broadcom BCM2711, quad-core Cortex-A72 (ARM v8) 64-bit SoC @ 1.5GHz
+	RAM: 4 GB
+
+Ian
+	PI 4
+	1st test - 	8045.551169395447 seconds
+			97.68571428571428% accuracy
+	Laptop (specs above) OS - Ubuntu 20.04 LTS
+	1st test - 	1672.763 seconds
+			97.519% accuracy
+

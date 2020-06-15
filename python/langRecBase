@@ -87,15 +87,7 @@ def cosAngle(u, v):
 	cos = np.dot(u[0,:], v[0,:]) / (np.linalg.norm(u) * np.linalg.norm(v))
 	return cos
 
-
-if __name__ == '__main__':
-	start_time = time.time()
-	
-	iM = {}
-	langAM = {}
-	langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
-	N=4
-	D=10000
+def buildLanguageHV(iM, langHV, langLabels, N, D):
 	for data, i in readLabels(langLabels):
 		iM, langHV = computeSumHV(data, iM, N, D)
 		langAM[langLabels[i]] = langHV
@@ -103,8 +95,9 @@ if __name__ == '__main__':
 		
 	print(iM)
 	print(langAM)
-	
-	#testing the function
+	return iM, langAM
+
+def testHV(iM, langAM, N, D, langLabels):
 	langMap = {}
 	langMap ['af'] = 'afr'
 	langMap ['bg'] = 'bul'
@@ -156,7 +149,21 @@ if __name__ == '__main__':
 		
 		accuracy = correct / total
 		
-	print(accuracy * 100)
+	return accuracy
+
+if __name__ == '__main__':
+	start_time = time.time()
+	N=4
+	D=10000
+	iM = {}
+	langAM = {}
+	langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
+	
+	#iM, langAM = buildLanguageHV(iM, langAM, langLabels, N, D)
+	
+	#testing the function
+	
+	accuracy = testHV(iM, langAM, N, D, langLabels)
 	
 	end_time = time.time()
 	
