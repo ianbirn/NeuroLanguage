@@ -2,6 +2,7 @@ import numpy as np
 import os
 import glob
 import fnmatch
+import time
 
 def readLabels(langLabels): #will read a training file and yield the buffer, looping thru langLabels
 	i = 0
@@ -88,6 +89,8 @@ def cosAngle(u, v):
 
 
 if __name__ == '__main__':
+	start_time = time.time()
+	
 	iM = {}
 	langAM = {}
 	langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
@@ -154,3 +157,7 @@ if __name__ == '__main__':
 		accuracy = correct / total
 		
 	print(accuracy * 100)
+	
+	end_time = time.time()
+	
+	print('the program took ' + str(end_time-start_time) + ' seconds to run')
