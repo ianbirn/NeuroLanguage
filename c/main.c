@@ -22,7 +22,7 @@ double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]);
 
 int main() {
 	int N = 4;
-	int D = 10000;
+	int D = 10;
 	
 	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
 	int length = (sizeof langLabels)/(sizeof langLabels[0]);
@@ -36,7 +36,7 @@ int main() {
 	buildLangHV(N, D, langAM, iMHV, itemMemory);
 	
 	accuracy = test(N, D, langAM, iMHV, itemMemory);
-	printf("Accuracy = %.3f%\n", accuracy);
+	printf("Accuracy = %.3f%%\n", accuracy);
 	   
 	return 0;
 }
@@ -46,11 +46,9 @@ double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
 	FILE *fileID;
 	
 	char fileLabel[][3] = {"af", "bg", "cs", "da", "nl", "de", "en", "et", "fi", "fr", "el", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
-	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
 	int length = (sizeof fileLabel)/(sizeof fileLabel[0]);
 	
 	char predicLang[3];
-	char actualLang[3];
 	
 	int tmp[D];
 	int testSumHV[D];
@@ -60,7 +58,7 @@ double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
 	double angle;
 	char buffer[300000];
     
-    dir = opendir("./code/testing_texts");
+    dir = opendir("./testing_texts");
 	
     if (dir == NULL) {
         printf("Failed: Directory could not be openned.\n");
@@ -68,7 +66,7 @@ double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
     }
 	
     while((sd=readdir(dir)) != NULL) {
-        char fileAddress[50];
+        char fileAddress[272];
         double maxAngle = -1.0;
         
         //To ignore parent directory print
@@ -77,7 +75,7 @@ double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
         if (!strcmp (sd->d_name, ".."))    
             continue;
         
-        sprintf(fileAddress, "%s%s", "./code/testing_texts/", sd->d_name);
+        sprintf(fileAddress, "%s%s", "./testing_texts/", sd->d_name);
         
         fileID = fopen(fileAddress, "r"); 
         
@@ -289,6 +287,7 @@ void circShift(int n, int d, int arr[][d]) {
 	}
 }
 void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
+	FILE *fileID;
 	int sumHV[D];
 	
 	//Creating langLabels
@@ -298,13 +297,12 @@ void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]
 	//iterating through every file computingHV
 	for(int t=0; t<length; t++) {
 		//Creating the file address 
-		char fileAddress[29];
-
-		sprintf(fileAddress, "%s%s%s", "./code/training_texts/", langLabels[t], ".txt");
+		char fileAddress[25] = "./training_texts/";
 		
+		sprintf(fileAddress, "%s%s%s", "./training_texts/", langLabels[t], ".txt");
 		
 		//Opening the file address
-		FILE *fileID = fopen(fileAddress, "r"); 
+		fileID = fopen(fileAddress, "r"); 
 		
 		//Check to make sure the file can be opended
 		if (fileID == NULL) {
