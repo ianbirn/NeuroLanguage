@@ -10,16 +10,16 @@
 void perm(int D, int arr[]); //permutates an array
 void genRandomHV(int D, int randomHV[]); //generates random hypervector
 void circShift(int n, int d, int arr[][d]); //shifts the array circularly
-void assignItemMemory(int count, char buff[], char iM[]);
+//void assignItemMemory(int count, char buff[], char iM[]); //creates equivalent item memory
 void createItemMemoryHV(int D, int iMHV[][D], int size); //creates hypervectors for every single character in itemMemory
 void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D], int size); // sets the first row of block to the cooresponding randHV of key
-void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]);
-void buildLangHV(int N, int D, int langAM[][D]);
-void binarizeHV(int v[], int szofv);
-double norm(int a[], int n); 
-double dotProduct(int a[], int b[], int n);
+void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[], int iMHV[][D], char itemMemory[]); //performs the encoding on a text files
+void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]); //loads and computes the training files
+void binarizeHV(int v[], int szofv); //sets the testing HV to 1s and -1s for comparrison 
+double norm(int a[], int n); //returns the norm of an array
+double dotProduct(int a[], int b[], int n); //returns the dot product between two arrays
 double cosAngle(int a[], int b[], int n) ; //measures distance between vectors
-double test(int N, int D, int langAM[][D]);
+double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]);
 
 int main() {
 	int N = 4;
@@ -27,17 +27,23 @@ int main() {
 	
 	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
 	int length = (sizeof langLabels)/(sizeof langLabels[0]);
+	char itemMemory[27] = "abcdefghijklmnopqrstuvwxyz ";
 	int langAM[length][D];
 	double accuracy;
-
-	buildLangHV(N, D, langAM);
 	
-	accuracy = test(N, D, langAM);
+	//assignItemMemory(count, buffer, itemMemory);
+
+	int iMHV[27][D];
+	createItemMemoryHV(D, iMHV, 27);
+
+	buildLangHV(N, D, langAM, iMHV, itemMemory);
+	
+	accuracy = test(N, D, langAM, iMHV, itemMemory);
 	printf("Accuracy = %.3f%\n", accuracy);
 	   
 	return 0;
 }
-double test(int N, int D, int langAM[][D]) {
+double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
 	DIR *dir;
 	struct dirent *sd;
 	FILE *fileID;
@@ -78,11 +84,6 @@ double test(int N, int D, int langAM[][D]) {
             continue;
         
         sprintf(fileAddress, "%s%s", "./code/testing_texts/", sd->d_name);
-        //strcpy(actualLang, sd->d_name);
-        //sprintf(actualLang, "%s", sd->d_name);
-        //sprintf(actualLang, "%c%c", actualLang[0], actualLang[1]);
-        //printf("%s  ", actualLang);
-        //printf("%s", fileAddress);
         
         fileID = fopen(fileAddress, "r"); 
         
@@ -103,7 +104,7 @@ double test(int N, int D, int langAM[][D]) {
         fclose(fileID);
         printf("Loaded: %s\n", fileAddress);
         
-		computeSumHV (D, N, testSumHV, count, buffer);
+		computeSumHV (D, N, testSumHV, count, buffer, iMHV, itemMemory);
 		binarizeHV(testSumHV, D);
 		
 		for(int l=0; l<length; l++) { //loop to go through the languages	
@@ -111,8 +112,8 @@ double test(int N, int D, int langAM[][D]) {
 				tmp[i] = langAM[l][i];
 			}	
 			
-			angle = cosAngle(testSumHV, tmp, D);	//measure distance
-			//printf("%g ", angle);
+			angle = cosAngle(testSumHV, tmp, D);
+			//printf("%i ", angle);
 			
 			if (angle > maxAngle) {
 				maxAngle = angle;
@@ -139,23 +140,22 @@ double test(int N, int D, int langAM[][D]) {
 
 
 double norm(int a[], int n) {
-	int sum=0;
+	double sum=0.0;
 	double norm=0.0;
 	for (int i=0; i<n; i++) {
-		sum += a[i] * a[i];
+		sum += ((double)a[i] * (double)a[i]);
 	}
-	norm = (double)sum;
-	norm = fabs(norm);
-	norm = sqrt(norm);
-	return norm;
+	norm = sqrt(sum);
+
+	return sum;
 }
 
 double dotProduct(int a[], int b[], int n) {
-	int product = 0;
+	double product = 0.0;
 	for (int i=0; i<n; i++) {
-		product += a[i] * b[i];
+		product += ((double)a[i] * (double)b[i]);
 	}	
-	return (double)product;
+	return product;
 }
 //Change
 double cosAngle(int a[], int b[], int n) {
@@ -173,18 +173,11 @@ void binarizeHV( int v[], int szofv) {
 }
 
 
-void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]) {
-	char itemMemory[27] = "aaaaaaaaaaaaaaaaaaaaaaaaaaa"; 
-	
+void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[], int iMHV[][D], char itemMemory[]) { 
 	int block[N][D];
 	char key;
-	
-	assignItemMemory(count, buffer, itemMemory);
-	//printf("%s\n", itemMemory);
-	int size = strlen(itemMemory);
-	//printf("%i\n", size);
-	int iMHV[size][D];
-	createItemMemoryHV(D, iMHV, size);
+	//int size = strlen(itemMemory);
+
 	
 	//Initializing block and sum to be arrays of 0
 	for(int i=0; i<N; i++) {
@@ -202,7 +195,7 @@ void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]) {
 		key = buffer[i];
 		circShift(N, D, block);
 		
-		lookupItemMemory(D, iMHV, itemMemory, key, block, size); 	
+		lookupItemMemory(D, iMHV, itemMemory, key, block, 27); 	
 			
 		if (i >= N) {
 			int nGrams[D];
@@ -355,7 +348,7 @@ void circShift(int n, int d, int arr[][d]) {
 		}
 	}
 }
-void buildLangHV(int N, int D, int langAM[][D]) {
+void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
 	int sumHV[D];
 	
 	//Creating langLabels
@@ -394,9 +387,7 @@ void buildLangHV(int N, int D, int langAM[][D]) {
 		//printf("%s\n", buffer);
 		printf("Loaded training language file %s\n", fileAddress);
 
-		computeSumHV(D, N, sumHV, count, buffer);
-		 
-		 //Uncomment to test that the void function works
+		computeSumHV(D, N, sumHV, count, buffer, iMHV, itemMemory);
 		 
 		for(int i=0; i<D; i++) {
 			langAM[t][i] = sumHV[i];
