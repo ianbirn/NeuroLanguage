@@ -11,8 +11,8 @@ void perm(int D, int arr[]); //permutates an array
 void genRandomHV(int D, int randomHV[]); //generates random hypervector
 void circShift(int n, int d, int arr[][d]); //shifts the array circularly
 void assignItemMemory(int count, char buff[], char iM[]);
-void createItemMemoryHV(int D, int iMHV[][D]); //creates hypervectors for every single character in itemMemory
-void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D]); // sets the first row of block to the cooresponding randHV of key
+void createItemMemoryHV(int D, int iMHV[][D], int size); //creates hypervectors for every single character in itemMemory
+void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D], int size); // sets the first row of block to the cooresponding randHV of key
 void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]);
 void buildLangHV(int N, int D, int langAM[][D]);
 void binarizeHV(int v[], int szofv);
@@ -23,7 +23,7 @@ double test(int N, int D, int langAM[][D]);
 
 int main() {
 	int N = 4;
-	int D = 10;
+	int D = 10000;
 	
 	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
 	int length = (sizeof langLabels)/(sizeof langLabels[0]);
@@ -174,13 +174,17 @@ void binarizeHV( int v[], int szofv) {
 
 
 void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]) {
-	int iMHV[27][D];
 	char itemMemory[27] = "aaaaaaaaaaaaaaaaaaaaaaaaaaa"; 
 	
 	int block[N][D];
 	char key;
+	
 	assignItemMemory(count, buffer, itemMemory);
-	createItemMemoryHV(D, iMHV);
+	//printf("%s\n", itemMemory);
+	int size = strlen(itemMemory);
+	//printf("%i\n", size);
+	int iMHV[size][D];
+	createItemMemoryHV(D, iMHV, size);
 	
 	//Initializing block and sum to be arrays of 0
 	for(int i=0; i<N; i++) {
@@ -198,10 +202,9 @@ void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]) {
 		key = buffer[i];
 		circShift(N, D, block);
 		
-		lookupItemMemory(D, iMHV, itemMemory, key, block); 	
+		lookupItemMemory(D, iMHV, itemMemory, key, block, size); 	
 			
 		if (i >= N) {
-			//int *temp = block[0];
 			int nGrams[D];
 				
 			//assigns nGrams to the first row of block
@@ -210,10 +213,8 @@ void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[]) {
 			}		
 				
 			for(int j=1; j<N; j++) {
-				for(int k=0; k<1; k++) {
-					for(int l=0; l<D; l++) {
+				for(int l=0; l<D; l++) {
 						nGrams[l] = nGrams[l] * block[j][l];
-					}
 				}
 			}	
 			for(int j=0; j<D; j++) {
@@ -232,8 +233,8 @@ void removeChar(char *s, int c) {
 	s[j] = '\0';
 	
 }
-void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D]) {
-	for (int i=0; i<27; i++) {
+void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D], int size) {
+	for (int i=0; i<size; i++) {
 		if (itemMemory[i] == key) {
 			for(int j=0; j<D; j++) {
 				block[0][j] = iMHV[i][j];
@@ -280,8 +281,8 @@ void assignItemMemory(int count, char buff[], char iM[]) {
 	//printf("\n");
 	//printf("%s\n", iM);
 }
-void createItemMemoryHV(int D, int iMHV[][D]) {
-	for(int i=0; i<27; i++) {
+void createItemMemoryHV(int D, int iMHV[][D], int size) {
+	for(int i=0; i<size; i++) {
 		int randomHV[D];
 		genRandomHV(D, randomHV);
 		for(int j=0; j<D; j++) {
