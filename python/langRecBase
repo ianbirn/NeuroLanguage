@@ -159,7 +159,7 @@ if __name__ == '__main__':
 	langAM = {}
 	langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
 	
-	#iM, langAM = buildLanguageHV(iM, langAM, langLabels, N, D)
+	iM, langAM = buildLanguageHV(iM, langAM, langLabels, N, D)
 	
 	#testing the function
 	
