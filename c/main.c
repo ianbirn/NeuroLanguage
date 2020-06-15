@@ -10,7 +10,6 @@
 void perm(int D, int arr[]); //permutates an array
 void genRandomHV(int D, int randomHV[]); //generates random hypervector
 void circShift(int n, int d, int arr[][d]); //shifts the array circularly
-//void assignItemMemory(int count, char buff[], char iM[]); //creates equivalent item memory
 void createItemMemoryHV(int D, int iMHV[][D], int size); //creates hypervectors for every single character in itemMemory
 void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D], int size); // sets the first row of block to the cooresponding randHV of key
 void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[], int iMHV[][D], char itemMemory[]); //performs the encoding on a text files
@@ -30,8 +29,6 @@ int main() {
 	char itemMemory[27] = "abcdefghijklmnopqrstuvwxyz ";
 	int langAM[length][D];
 	double accuracy;
-	
-	//assignItemMemory(count, buffer, itemMemory);
 
 	int iMHV[27][D];
 	createItemMemoryHV(D, iMHV, 27);
@@ -48,7 +45,6 @@ double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
 	struct dirent *sd;
 	FILE *fileID;
 	
-	//double accuracy;
 	char fileLabel[][3] = {"af", "bg", "cs", "da", "nl", "de", "en", "et", "fi", "fr", "el", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
 	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
 	int length = (sizeof fileLabel)/(sizeof fileLabel[0]);
@@ -63,8 +59,6 @@ double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
 	double accuracy;
 	double angle;
 	char buffer[300000];
-
-    
     
     dir = opendir("./code/testing_texts");
 	
@@ -113,21 +107,15 @@ double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
 			}	
 			
 			angle = cosAngle(testSumHV, tmp, D);
-			//printf("%i ", angle);
 			
 			if (angle > maxAngle) {
 				maxAngle = angle;
 				sprintf(predicLang, "%s", fileLabel[l]);
 			}
 		}
-		//printf("\n");
-		
-		//printf("%s\n", predicLang);*/
 		
 		if ((predicLang[0] == (sd->d_name)[0]) && (predicLang[1] == (sd->d_name)[1])) {
-			//printf("Correct\n");
 			correct++;
-		
 		}
 		total++;
     }
@@ -147,7 +135,7 @@ double norm(int a[], int n) {
 	}
 	norm = sqrt(sum);
 
-	return sum;
+	return norm;
 }
 
 double dotProduct(int a[], int b[], int n) {
@@ -216,16 +204,6 @@ void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[], int iMHV
 		}
 	}
 }
-void removeChar(char *s, int c) {
-	int j, n = strlen(s);
-	for(int i=j=0; i<n; i++) {
-		if(s[i] != c) {
-			s[j++] = s[i];
-		}
-	}
-	s[j] = '\0';
-	
-}
 void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D], int size) {
 	for (int i=0; i<size; i++) {
 		if (itemMemory[i] == key) {
@@ -235,44 +213,6 @@ void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int blo
 			break;
 		}
 	}	
-}
-void assignItemMemory(int count, char buff[], char iM[]) {
-	char temp[count];
-	int k=0;
-	
-	//so as to not delete content of original buffer
-	for(int i=0; i<count; i++) {
-		temp[i] = buff[i];
-	}
-	
-	int i=0;
-	int j=0;
-	if (count > 300000) {
-		for(i=0; i<27; i++) {
-			if((temp[0] == '\n') || (temp[0] == '\t') || (temp[0] == '\r')) {
-				removeChar(temp, temp[0]);
-			}
-			else {
-				iM[i] = temp[0];
-				removeChar(temp, temp[0]);
-			}	
-		}
-		iM[i] = '\0';
-	}
-	else {
-		for(j=0; j<strlen(temp); j++) {
-			if((temp[0] == '\n') || (temp[0] == '\t') || (temp[0] == '\r')) {
-				removeChar(temp, temp[0]);
-			}
-			else {
-				iM[j] = temp[0];
-				removeChar(temp, temp[0]);	
-			}
-		}
-		iM[j] = '\0';
-	}	
-	//printf("\n");
-	//printf("%s\n", iM);
 }
 void createItemMemoryHV(int D, int iMHV[][D], int size) {
 	for(int i=0; i<size; i++) {
