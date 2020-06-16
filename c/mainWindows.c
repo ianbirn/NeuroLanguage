@@ -37,7 +37,7 @@ int main() {
 	buildLangHV(N, D, langAM, iMHV, itemMemory);
 	
 	accuracy = test(N, D, langAM, iMHV, itemMemory);
-	printf("Accuracy = %f %%\n", accuracy);
+	printf("Accuracy = %.3f%%\n", accuracy);
 	   
 	return 0;
 }
@@ -59,11 +59,11 @@ double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
 	char fileLabel[][3] = {"af", "bg", "cs", "da", "nl", "de", "en", "et", "fi", "fr", "el", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
 	int length = (sizeof fileLabel)/(sizeof fileLabel[0]);
 	
-	double angle;
-	char predicLang[66];
-	int correct=0;
-	int total=0;
-	double accuracy;
+	double angle = 0.0;
+	char predicLang[3];
+	double correct=0.0;
+	double total = 0.0;
+	double accuracy = 0.0;
 	
 	dir = opendir("./testing_texts");
 	
@@ -110,14 +110,17 @@ double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
 			for(int i=0; i<D; i++) {
 				tmp[i] = langAM[l][i];
 			}	
-			
+
 			angle = cosAngle(testSumHV, tmp, D);
+			//printf("%f ", angle);
 			
 			if (angle > maxAngle) {
 				maxAngle = angle;
-				snprintf(predicLang, 66, "%s", fileLabel[l]);
+				snprintf(predicLang, 3, "%c%c", fileLabel[l][0], fileLabel[l][1]);
 			}
 		}
+		
+		//printf("%s ", predicLang);
 		
 		if ((predicLang[0] == (sd->d_name)[0]) && (predicLang[1] == (sd->d_name)[1])) {
 			correct++;
@@ -130,9 +133,9 @@ double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
 	free(tmp);
 	free(testSumHV);
 	
-    accuracy = (double)correct/(double)total;
+    accuracy = correct/total;
     accuracy = accuracy * 100.0;
-	return accuracy;
+	return correct;
 }
 double norm(int *a, int n) {
 	double sum=0.0;
