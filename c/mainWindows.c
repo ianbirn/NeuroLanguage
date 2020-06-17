@@ -13,8 +13,8 @@ void genRandomHV(int D, int randomHV[]); //generates random hypervector
 void createItemMemoryHV(int D, int iMHV[][D], int size); //creates hypervectors for every single character in itemMemory
 void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]); //loads and computes the training 
 void computeSumHV(int N, int D, int *sumHV, int count, char *buffer, int iMHV[][D], char itemMemory[]); //performs the encoding on a text files
-void circShift(int N, int D, int **arr);
-void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int **block);
+void circShift(int n, int d, int *arr);
+void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int *block);
 double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]);
 void binarizeHV(int *v, int szofv);
 double norm(int *a, int n);
@@ -36,8 +36,8 @@ int main() {
 
 	buildLangHV(N, D, langAM, iMHV, itemMemory);
 	
-	//accuracy = test(N, D, langAM, iMHV, itemMemory);
-	//printf("Accuracy = %.3f%%\n", accuracy);
+	accuracy = test(N, D, langAM, iMHV, itemMemory);
+	printf("Accuracy = %.3f%%\n", accuracy);
 	   
 	return 0;
 }
@@ -276,42 +276,37 @@ void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]
 }
 
 void computeSumHV(int N, int D, int *sumHV, int count, char *buffer, int iMHV[][D], char itemMemory[]) { 
-    int **block = (int **)malloc(N * sizeof(int *)); 
-    for (int i=0; i<N; i++) {
-         block[i] = (int *)malloc(D * sizeof(int)); 
-	}
+	int *block = (int *)malloc(N * D * sizeof(int)); 
+	
 	char key;
 	
 	for(int i=0; i<N; i++) {
 		for(int j=0; j<D; j++) {
-			block[i][j] = 0;
+			*(block + i*D + j) = 0;
 		}
 	}
 	
 	for(int i=0; i<D; i++) {
-		sumHV[i] = 0;
+		*(sumHV +i) = 0;
 	}
 	
 	for(int i=0; i<count; i++) {
 		key = buffer[i];
 		circShift(N, D, block);
-		
 		lookupItemMemory(D, iMHV, itemMemory, key, block); 
 		
-		/*
 		if (i >= N) {
-			
 			int *nGrams;
 			nGrams = (int*)malloc(D * sizeof(int));
 			
 			//assigns nGrams to the first row of block
 			for(int j=0; j<D; j++) {
-				nGrams[j] = block[0][j];
+				nGrams[j] = *(block + j);
 			}	
 			
 			for(int j=1; j<N; j++) {
 				for(int l=0; l<D; l++) {
-					nGrams[l] = nGrams[l] * block[j][l];
+					nGrams[l] = nGrams[l] * (*(block + j*D + l));
 				}
 			}
 			
@@ -319,67 +314,52 @@ void computeSumHV(int N, int D, int *sumHV, int count, char *buffer, int iMHV[][
 				sumHV[j] = sumHV[j] + nGrams[j];
 			}
 			free(nGrams);
-		}*/
-		
+		}
+
 	}
 	free(block);
-	
 }
-void circShift(int n, int d, int **arr) {
-	int **arr1 = (int **)malloc(n * sizeof(int *)); 
-    for (int i=0; i<n; i++) {
-         arr1[i] = (int *)malloc(d * sizeof(int)); 
-	}
-	
-	int **arr2 = (int **)malloc(n * sizeof(int *)); 
-    for (int i=0; i<n; i++) {
-         arr2[i] = (int *)malloc(d * sizeof(int)); 
-	}
-	
-	
+void circShift(int n, int d, int *arr) {	
+    int *arr1 = (int *)malloc(n * d * sizeof(int)); 
+
+	//format: *(arr + i*col + j));
+
 	for(int i=0; i<1; i++) {
 		for(int j=0; j<d; j++) {
-			arr1[i][j] = arr[n-1][j];
+			*(arr1 + i*d + j) = *(arr + (n-1)*d + j);
 		}
 	}
 	
 	for(int i=1; i<n; i++) {
 		for(int j=0; j<d; j++) {
-			arr1[i][j] = arr[i-1][j];
+			*(arr1 + i*d + j) = *(arr + (i-1)*d + j);
 		}
 	}
 	
+
 	for(int i=0; i<n; i++) {
 		for(int j=0; j<d-1; j++){
-			arr2[i][j+1] = arr1[i][j];
+			*(arr + i*d + (j+1)) = *(arr1 + i*d + j);
 		}
 		
 	}
 	
 	for(int i=0; i<n; i++) {
 		for(int j=d-1; j<d; j++) {
-			arr2[i][0] = arr1[i][d-1];
+			*(arr + i*d) = *(arr1 + i*d + (d-1));
 		}
 	}
-	
-	for(int i=0; i<n; i++) {
-		for(int j=0; j<d; j++) {
-			arr[i][j] = arr2[i][j];
-		}
-		
-	}
-	
-	free(arr2);
+
 	free(arr1);
 }
-void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int **block) {
-
+void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int *block) {
 	for (int i=0; i<27; i++) {
 		if (itemMemory[i] == key) {
-			for(int j=0; j<D; j++) {
-				block[0][j] = iMHV[i][j];
+				for(int j=0; j<D; j++) {
+					*(block + j) = iMHV[i][j];
 			}
 			break;
 		}
-	}	
+	}
+
 }
