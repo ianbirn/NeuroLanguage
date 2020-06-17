@@ -7,17 +7,14 @@
 #include <dirent.h>
 #include <unistd.h>
 
-int N = 4;
-int D = 10000;
-
 
 void perm(int D, int arr[]); //permutates an array
 void genRandomHV(int D, int randomHV[]); //generates random hypervector
 void createItemMemoryHV(int D, int iMHV[][D], int size); //creates hypervectors for every single character in itemMemory
 void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]); //loads and computes the training 
 void computeSumHV(int N, int D, int *sumHV, int count, char *buffer, int iMHV[][D], char itemMemory[]); //performs the encoding on a text files
-void circShift(int n, int d, int *arr);
-void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int *block);
+void circShift(int N, int D, int **arr);
+void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int **block);
 double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]);
 void binarizeHV(int *v, int szofv);
 double norm(int *a, int n);
@@ -25,6 +22,9 @@ double dotProduct(int *a, int *b, int n);
 double cosAngle(int *a, int *b, int n);
 
 int main() {
+	int N = 4;
+	int D = 10000;
+	
 	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
 	int length = (sizeof langLabels)/(sizeof langLabels[0]);
 	char itemMemory[27] = "abcdefghijklmnopqrstuvwxyz ";
@@ -36,8 +36,8 @@ int main() {
 
 	buildLangHV(N, D, langAM, iMHV, itemMemory);
 	
-	accuracy = test(N, D, langAM, iMHV, itemMemory);
-	printf("Accuracy = %.3f%%\n", accuracy);
+	//accuracy = test(N, D, langAM, iMHV, itemMemory);
+	//printf("Accuracy = %.3f%%\n", accuracy);
 	   
 	return 0;
 }
@@ -135,7 +135,7 @@ double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
 	
     accuracy = correct/total;
     accuracy = accuracy * 100.0;
-	return correct;
+	return accuracy;
 }
 double norm(int *a, int n) {
 	double sum=0.0;
@@ -221,7 +221,6 @@ void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]
 	//Creating langLabels
 	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
 	int length =  (sizeof langLabels)/(sizeof langLabels[0]); //size of langLabels
-	//
 	
 	char *buffer;
 	buffer = (char*)malloc(2000000 * sizeof(char));
@@ -230,8 +229,6 @@ void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]
 		printf("Not enough memory!\n");
 		exit(1);
 	}
-	//printf("Test");
-	
 	
 	//iterating through every file computingHV
 	for(int t=0; t<length; t++) {
@@ -279,13 +276,15 @@ void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]
 }
 
 void computeSumHV(int N, int D, int *sumHV, int count, char *buffer, int iMHV[][D], char itemMemory[]) { 
-	//int block[N][D];
-	int *block = (int *)malloc(N * D * sizeof(int)); 
+    int **block = (int **)malloc(N * sizeof(int *)); 
+    for (int i=0; i<N; i++) {
+         block[i] = (int *)malloc(D * sizeof(int)); 
+	}
 	char key;
 	
 	for(int i=0; i<N; i++) {
 		for(int j=0; j<D; j++) {
-			 *(block + i*N + j) = 0;
+			block[i][j] = 0;
 		}
 	}
 	
@@ -296,9 +295,10 @@ void computeSumHV(int N, int D, int *sumHV, int count, char *buffer, int iMHV[][
 	for(int i=0; i<count; i++) {
 		key = buffer[i];
 		circShift(N, D, block);
+		
 		lookupItemMemory(D, iMHV, itemMemory, key, block); 
 		
-		
+		/*
 		if (i >= N) {
 			
 			int *nGrams;
@@ -306,14 +306,12 @@ void computeSumHV(int N, int D, int *sumHV, int count, char *buffer, int iMHV[][
 			
 			//assigns nGrams to the first row of block
 			for(int j=0; j<D; j++) {
-				nGrams[j] = *(block + 0 + j);
-				//printf("%i ", nGrams[j]);
+				nGrams[j] = block[0][j];
 			}	
-			//printf("\n");
 			
 			for(int j=1; j<N; j++) {
 				for(int l=0; l<D; l++) {
-					nGrams[l] = nGrams[l] * (*(block + j*N + l));
+					nGrams[l] = nGrams[l] * block[j][l];
 				}
 			}
 			
@@ -321,49 +319,65 @@ void computeSumHV(int N, int D, int *sumHV, int count, char *buffer, int iMHV[][
 				sumHV[j] = sumHV[j] + nGrams[j];
 			}
 			free(nGrams);
-		}
+		}*/
 		
 	}
 	free(block);
 	
 }
-void circShift(int n, int d, int *arr) {
-	int *arr1 = (int *)malloc(N * D * sizeof(int)); 
-	
-  //Pushes every row down one
-	for(int i=0; i<n; i++) {
-		for(int j=0; j<d; j++) {
-			if (i==0) {
-				*(arr1 + i*n + j) =  *(arr + (n-1) + j);
-			}
-			else {
-				*(arr1 + i*n + j) =  *(arr + (i-1) + j);
-			}
-		}
+void circShift(int n, int d, int **arr) {
+	int **arr1 = (int **)malloc(n * sizeof(int *)); 
+    for (int i=0; i<n; i++) {
+         arr1[i] = (int *)malloc(d * sizeof(int)); 
 	}
-  
-  //Pushes every column to the right by 1
-	for(int i=0; i<n; i++) {
+	
+	int **arr2 = (int **)malloc(n * sizeof(int *)); 
+    for (int i=0; i<n; i++) {
+         arr2[i] = (int *)malloc(d * sizeof(int)); 
+	}
+	
+	
+	for(int i=0; i<1; i++) {
 		for(int j=0; j<d; j++) {
-			if (j == (d-1)) {
-				*(arr + i*n + 0) =  *(arr1 + i*n + (d-1));
-				//printf("%i ", *(arr + i*n + 0));   //#this was during testing
-			}
-			
-			else { 
-				*(arr + i*n + (j+1)) =  *(arr1 + i*n + j);
-			}
+			arr1[i][j] = arr[n-1][j];
 		}
 	}
 	
+	for(int i=1; i<n; i++) {
+		for(int j=0; j<d; j++) {
+			arr1[i][j] = arr[i-1][j];
+		}
+	}
+	
+	for(int i=0; i<n; i++) {
+		for(int j=0; j<d-1; j++){
+			arr2[i][j+1] = arr1[i][j];
+		}
+		
+	}
+	
+	for(int i=0; i<n; i++) {
+		for(int j=d-1; j<d; j++) {
+			arr2[i][0] = arr1[i][d-1];
+		}
+	}
+	
+	for(int i=0; i<n; i++) {
+		for(int j=0; j<d; j++) {
+			arr[i][j] = arr2[i][j];
+		}
+		
+	}
+	
+	free(arr2);
 	free(arr1);
 }
-void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int *block) {
+void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int **block) {
+
 	for (int i=0; i<27; i++) {
 		if (itemMemory[i] == key) {
 			for(int j=0; j<D; j++) {
-				*(block + 0 + j) = iMHV[i][j];
-				
+				block[0][j] = iMHV[i][j];
 			}
 			break;
 		}
