@@ -37,3 +37,19 @@ Ian
 	1st test - 	1672.763 seconds
 			97.519% accuracy
 
+
+-------------------------------------------------------------------
+		C Timing
+-------------------------------------------------------------------
+PI SPECS
+	OS: Raspbian GNU/Linux 10 (buster)
+	CPU: Broadcom BCM2711, quad-core Cortex-A72 (ARM v8) 64-bit SoC @ 1.5GHz
+	RAM: 4 GB
+	
+Caroline
+	PI 4		Speed		Accuracy	 
+	Trial 1		3091.575s	97.662%	
+	
+	
+	Laptop		Speed		Accuracy	 
+	Trial 1		840.913 s	97.624%
