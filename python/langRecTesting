@@ -32,12 +32,12 @@ def readTestFiles(path):
 				buff.append(row)
 			yield np.array(buff, dtype='str'), textFile
 	
-def readTrainingFiles(path, D): 
+def readTrainingFiles(path): 
 	pattern = '*.csv'
 	for textFile in os.listdir(path):
 		if fnmatch.fnmatch(textFile, pattern):
 			with open(os.path.join(path, textFile)) as thefile:
-				buff = np.loadtxt(thefile, dtype='int', delimiter=',')
+				buff = np.loadtxt(thefile, delimiter=',')
 				yield buff, textFile
 
 
@@ -160,15 +160,21 @@ def testHV(iM, langAM, N, D, langLabels):
 	return accuracy
 
 if __name__ == '__main__':
-	start_time = time.time()
-	N=4
-	D=10000
+	N=int(input('Enter value for N: '))
+	D=int(input('Enter value for D: '))
 	iM = {}
 	langAM = {}
 	langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
 	
+	start_time = time.time()
+	
+	#check if folder exits, if not, break the program
+	path = 'cachedTraining/' + str(D) + '_' + str(N)
+	if  not os.path.isdir(path):
+		break
+	
 	#read in the training files
-	for arr, name in readTrainingFiles('cachedTraining/', D):
+	for arr, name in readTrainingFiles(path):
 		if (name[0:2] == 'im'):
 			newKey = os.path.splitext(name)[0][3:]
 			iM[newKey] = arr

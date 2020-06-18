@@ -95,26 +95,31 @@ def buildLanguageHV(iM, langHV, langLabels, N, D):
 
 
 if __name__ == '__main__':
-	start_time = time.time()
-	N=4
-	D=10000
+	
+	N= int(input('Enter value for N: '))
+	D= int(input('Enter value for D: '))
 	iM = {}
 	langAM = {}
 	langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
 	
+	start_time = time.time()
+	
 	iM, langAM = buildLanguageHV(iM, langAM, langLabels, N, D)
 	
 	#check if folder exists, create or clear it
+	path = 'cachedTraining/' + str(D) + '_' + str(N)
+	if not os.path.isdir(path):
+		os.mkdir(path)
 	
 	#write itemMemory
 	for key, value in iM.items():
 		filename = 'im_' + key + '.csv'
-		with open('cachedTraining/' + filename, 'w') as thefile:
+		with open(path + '/' + filename, 'w') as thefile:
 			np.savetxt(thefile, value, delimiter=',')
 
 	for key, value in langAM.items():
 		filename = 'la_' + key + '.csv'
-		with open('cachedTraining/' + filename, 'w') as thefile:
+		with open(path + '/' + filename, 'w') as thefile:
 			np.savetxt(thefile, value, delimiter=',')
 	
 	
