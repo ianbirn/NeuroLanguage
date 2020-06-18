@@ -3,8 +3,8 @@ import os
 import glob
 import fnmatch
 import time
-
-def readLabels(langLabels): #will read a training file and yield the buffer, looping thru langLabels
+#will read a training file and yield the buffer, looping thru langLabels
+def readLabels(langLabels): 
 	i = 0
 	while i < langLabels.size:
 		address = '../training_texts/' + langLabels[i] + '.txt'
@@ -14,13 +14,16 @@ def readLabels(langLabels): #will read a training file and yield the buffer, loo
 		yield np.array(buff, dtype='str'), i
 		i+=1
 
-def getKeys(arr): #given numpy arr, scan each letter one by one and yield it
+#given numpy arr, scan each letter one by one and yield it
+def getKeys(arr): 
 	i = 0
 	for line in arr:
 		for char in line:
 			yield char
-
-def readTestFiles(path):
+			
+			
+#this gen function will scan through the testing_files and return buffer and file name
+def readTestFiles(path): 
 	pattern = '*.txt'
 	for textFile in os.listdir(path):
 		if fnmatch.fnmatch(textFile, pattern):
@@ -32,7 +35,8 @@ def readTestFiles(path):
 
 
 
-
+#this function will generate a completely random array of 1's and -1's of
+# size D
 def genRandomHV (D):
 	if D % 2:
 		print('dimension is odd!')
@@ -44,6 +48,9 @@ def genRandomHV (D):
 		randomHV[0, np.where(randomIndex >= half)] = -1
 	return randomHV
 
+#given a dictionary, a Key, and D, if key exists in dictionary return value, if not
+# create a new hypervector and enter it into the dictionary as a new key and return the new
+# dictionary and new hypervector
 def lookupItemMemory(itemM, key, D):
 	if key in itemM:
 		randomHV = itemM[key]
@@ -53,7 +60,8 @@ def lookupItemMemory(itemM, key, D):
 	
 	return itemM, randomHV
 
-
+#core function. takes hypervectors for letters N at a time and circularly shifts them down
+#and to the right. the N block is multiplied and added to the sumHV to create the languageHV
 def computeSumHV(text, itemMemory, N, D):
 	block = np.zeros((N, D), dtype='int')
 	sumHV = np.zeros((1, D), dtype='int')
@@ -72,7 +80,7 @@ def computeSumHV(text, itemMemory, N, D):
 		i+=1
 	return itemMemory, sumHV
 
-
+#helper function to turn a language hypervector into a binarized version
 def binarizeHV(v):
 	threshold = 0
 	vsize = v.size
@@ -83,10 +91,12 @@ def binarizeHV(v):
 			v[0,i] = -1
 	return v
 
+#compute the similarity between two hypervectors
 def cosAngle(u, v):
 	cos = np.dot(u[0,:], v[0,:]) / (np.linalg.norm(u) * np.linalg.norm(v))
 	return cos
 
+#read in training files and computeSumHV on them
 def buildLanguageHV(iM, langHV, langLabels, N, D):
 	for data, i in readLabels(langLabels):
 		iM, langHV = computeSumHV(data, iM, N, D)
@@ -97,6 +107,8 @@ def buildLanguageHV(iM, langHV, langLabels, N, D):
 	print(langAM)
 	return iM, langAM
 
+#read testing files and calculate the similarities between them and the 
+#language hypervectors and output the accuracy
 def testHV(iM, langAM, N, D, langLabels):
 	langMap = {}
 	langMap ['af'] = 'afr'
