@@ -7,22 +7,23 @@
 #include <dirent.h>
 #include <unistd.h>
 
+
 void perm(int D, int arr[]); //permutates an array
 void genRandomHV(int D, int randomHV[]); //generates random hypervector
-void circShift(int n, int d, int arr[][d]); //shifts the array circularly
 void createItemMemoryHV(int D, int iMHV[][D], int size); //creates hypervectors for every single character in itemMemory
-void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D], int size); // sets the first row of block to the cooresponding randHV of key
-void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[], int iMHV[][D], char itemMemory[]); //performs the encoding on a text files
-void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]); //loads and computes the training files
-void binarizeHV(int v[], int szofv); //sets the testing HV to 1s and -1s for comparrison 
-double norm(int a[], int n); //returns the norm of an array
-double dotProduct(int a[], int b[], int n); //returns the dot product between two arrays
-double cosAngle(int a[], int b[], int n) ; //measures distance between vectors
+void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]); //loads and computes the training 
+void computeSumHV(int N, int D, int *sumHV, int count, char *buffer, int iMHV[][D], char itemMemory[]); //performs the encoding on a text files
+void circShift(int n, int d, int *arr);
+void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int *block);
 double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]);
+void binarizeHV(int *v, int szofv);
+double norm(int *a, int n);
+double dotProduct(int *a, int *b, int n);
+double cosAngle(int *a, int *b, int n);
 
 int main() {
 	int N = 4;
-	int D = 10;
+	int D = 10000;
 	
 	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
 	int length = (sizeof langLabels)/(sizeof langLabels[0]);
@@ -40,50 +41,55 @@ int main() {
 	   
 	return 0;
 }
+
 double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
 	DIR *dir;
 	struct dirent *sd;
 	FILE *fileID;
+
+	int *testSumHV;
+	testSumHV = (int*)malloc(D * sizeof(int));
+	
+	int *tmp;
+	tmp = (int*)malloc(D * sizeof(int));
+	
+	char *buffer;
+	buffer = (char*)malloc(300000 * sizeof(char));
 	
 	char fileLabel[][3] = {"af", "bg", "cs", "da", "nl", "de", "en", "et", "fi", "fr", "el", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
 	int length = (sizeof fileLabel)/(sizeof fileLabel[0]);
 	
+	double angle = 0.0;
 	char predicLang[3];
+	double correct=0.0;
+	double total = 0.0;
+	double accuracy = 0.0;
 	
-	int tmp[D];
-	int testSumHV[D];
-	int correct = 0;
-	int total = 0;
-	double accuracy;
-	double angle;
-	char buffer[300000];
-    
-    dir = opendir("./testing_texts");
+	dir = opendir("../testing_texts");
 	
     if (dir == NULL) {
         printf("Failed: Directory could not be openned.\n");
         exit(1);
     }
 	
-    while((sd=readdir(dir)) != NULL) {
-        char fileAddress[272];
-        double maxAngle = -1.0;
-        
-        //To ignore parent directory print
+	while((sd=readdir(dir)) != NULL) {
+		char fileAddress[273];
+		double maxAngle = -1.0;
+		
         if (!strcmp (sd->d_name, "."))
             continue;
         if (!strcmp (sd->d_name, ".."))    
             continue;
-        
-        sprintf(fileAddress, "%s%s", "./testing_texts/", sd->d_name);
-        
-        fileID = fopen(fileAddress, "r"); 
-        
+		
+		
+		snprintf(fileAddress, 273, "%s%s", "../testing_texts/", sd->d_name);
+		fileID = fopen(fileAddress, "r"); 
+		
         if (fileID == NULL) {
             printf("Failed: File could not be openned.\n");
             break;
         }
-        
+
         int count=0;
 		while(1) {
 			buffer[count] = fgetc(fileID);
@@ -93,39 +99,45 @@ double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
 			count++;
 		}
 		buffer[count] = '\0';	//ending string, closing file
-        fclose(fileID);
-        printf("Loaded: %s\n", fileAddress);
-        
-		computeSumHV (D, N, testSumHV, count, buffer, iMHV, itemMemory);
+
+		fclose(fileID);
+		printf("Loaded: %s\n", fileAddress);
+		
+		computeSumHV (N, D, testSumHV, count, buffer, iMHV, itemMemory);
 		binarizeHV(testSumHV, D);
 		
 		for(int l=0; l<length; l++) { //loop to go through the languages	
 			for(int i=0; i<D; i++) {
 				tmp[i] = langAM[l][i];
 			}	
-			
+
 			angle = cosAngle(testSumHV, tmp, D);
+			//printf("%f ", angle);
 			
 			if (angle > maxAngle) {
 				maxAngle = angle;
-				sprintf(predicLang, "%s", fileLabel[l]);
+				snprintf(predicLang, 3, "%c%c", fileLabel[l][0], fileLabel[l][1]);
 			}
 		}
+		
+		//printf("%s ", predicLang);
 		
 		if ((predicLang[0] == (sd->d_name)[0]) && (predicLang[1] == (sd->d_name)[1])) {
 			correct++;
 		}
 		total++;
-    }
-    closedir(dir);
-    accuracy = (double)correct/(double)total;
-    accuracy = accuracy * 100.0;
+		
+	}
+	closedir(dir);
+	free(buffer);
+	free(tmp);
+	free(testSumHV);
 	
+    accuracy = correct/total;
+    accuracy = accuracy * 100.0;
 	return accuracy;
 }
-
-
-double norm(int a[], int n) {
+double norm(int *a, int n) {
 	double sum=0.0;
 	double norm=0.0;
 	for (int i=0; i<n; i++) {
@@ -135,20 +147,18 @@ double norm(int a[], int n) {
 
 	return norm;
 }
-
-double dotProduct(int a[], int b[], int n) {
+double dotProduct(int *a, int *b, int n) {
 	double product = 0.0;
 	for (int i=0; i<n; i++) {
 		product += ((double)a[i] * (double)b[i]);
 	}	
 	return product;
 }
-//Change
-double cosAngle(int a[], int b[], int n) {
+double cosAngle(int *a, int *b, int n) {
 	return dotProduct(a, b, n)/(norm(a, n)*norm(b, n));	
 }
 
-void binarizeHV( int v[], int szofv) {
+void binarizeHV(int *v, int szofv) {
 	int threshold = 0;
 	for( int i=0; i<szofv; i++) {
 		if( v[i] > threshold ) 
@@ -158,60 +168,6 @@ void binarizeHV( int v[], int szofv) {
 	}
 }
 
-
-void computeSumHV(int D, int N, int sumHV[D], int count, char buffer[], int iMHV[][D], char itemMemory[]) { 
-	int block[N][D];
-	char key;
-	//int size = strlen(itemMemory);
-
-	
-	//Initializing block and sum to be arrays of 0
-	for(int i=0; i<N; i++) {
-		for(int j=0; j<D; j++) {
-			block[i][j] = 0;
-		}
-	}
-	for(int i=0; i<D; i++) {
-		sumHV[i] = 0;
-	}
-	
-	//itemMemory[0] = buffer[0];
-	for(int i=0; i<count; i++) {			
-			
-		key = buffer[i];
-		circShift(N, D, block);
-		
-		lookupItemMemory(D, iMHV, itemMemory, key, block, 27); 	
-			
-		if (i >= N) {
-			int nGrams[D];
-				
-			//assigns nGrams to the first row of block
-			for(int j=0; j<D; j++) {
-				nGrams[j] = block[0][j];
-			}		
-				
-			for(int j=1; j<N; j++) {
-				for(int l=0; l<D; l++) {
-						nGrams[l] = nGrams[l] * block[j][l];
-				}
-			}	
-			for(int j=0; j<D; j++) {
-				sumHV[j] = sumHV[j] + nGrams[j];
-			}
-		}
-	}
-}
-void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int block[][D], int size) {
-	for (int i=0; i<size; i++) {
-		if (itemMemory[i] == key) {
-			for(int j=0; j<D; j++) {
-				block[0][j] = iMHV[i][j];
-			}
-			break;
-		}
-	}	
-}
 void createItemMemoryHV(int D, int iMHV[][D], int size) {
 	for(int i=0; i<size; i++) {
 		int randomHV[D];
@@ -221,7 +177,21 @@ void createItemMemoryHV(int D, int iMHV[][D], int size) {
 		}
 	}
 }
-
+void perm(int D, int arr[]) {	
+	//Initialize Array
+	for(int i=0; i<D; i++) {
+		arr[i] = i;
+	}
+	
+	//Randomize the numbers of the array
+	int k, l;
+	for(int j=0; j<D; j++) {
+		k = rand() % (D-j) + j;
+		l = arr[k];
+		arr[k] = arr[j];
+		arr[j] = l; 
+	}
+}
 void genRandomHV(int D, int randomHV[]) {
 	//Later will alter to be scanf (user input availability)
 	if (D % 2 != 0) {
@@ -242,64 +212,31 @@ void genRandomHV(int D, int randomHV[]) {
 	}
 }
 
-void perm(int D, int arr[]) {	
-	//Initialize Array
-	for(int i=0; i<D; i++) {
-		arr[i] = i;
-	}
-	
-	//Randomize the numbers of the array
-	int k, l;
-	for(int j=0; j<D; j++) {
-		k = rand() % (D-j) + j;
-		l = arr[k];
-		arr[k] = arr[j];
-		arr[j] = l; 
-	}
-}
-
-void circShift(int n, int d, int arr[][d]) {
-	int arr1[n][d];
-	
-  //Pushes every row down one
-	for(int i=0; i<n; i++) {
-		for(int j=0; j<d; j++) {
-			if (i==0) {
-				arr1[i][j] = arr[n-1][j];
-			}
-			else {
-				arr1[i][j] = arr[i-1][j];
-			}
-		}
-	}
-  
-  //Pushes every column to the right by 1
-	for(int i=0; i<n; i++) {
-		for(int j=0; j<d; j++) {
-			if (j == (d-1)) {
-				arr[i][0] = arr1[i][d-1];
-				//printf("%i ", arr[i][0]);   //#this was during testing
-			}
-			else {
-				arr[i][j+1] = arr1[i][j];
-			}
-		}
-	}
-}
 void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
 	FILE *fileID;
-	int sumHV[D];
+	int *sumHV;
+	sumHV = (int*)malloc(D * sizeof(int));
+	
 	
 	//Creating langLabels
 	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
 	int length =  (sizeof langLabels)/(sizeof langLabels[0]); //size of langLabels
-	char buffer[2000000];
+	
+	char *buffer;
+	buffer = (char*)malloc(2000000 * sizeof(char));
+	
+	if(buffer == NULL) {
+		printf("Not enough memory!\n");
+		exit(1);
+	}
+	
 	//iterating through every file computingHV
 	for(int t=0; t<length; t++) {
 		//Creating the file address 
-		char fileAddress[25] = "./training_texts/";
+		char fileAddress[110];
 		
-		sprintf(fileAddress, "%s%s%s", "./training_texts/", langLabels[t], ".txt");
+		snprintf(fileAddress, 110, "%s%s%s", "../training_texts/", langLabels[t], ".txt");
+		//printf("%s\n", fileAddress);
 		
 		//Opening the file address
 		fileID = fopen(fileAddress, "r"); 
@@ -312,6 +249,7 @@ void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]
 		
 		
 		//Compiles every character in the text document into array, buffer
+		
 		int count=0;
 		while(1) {
 			buffer[count] = fgetc(fileID);
@@ -322,10 +260,10 @@ void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]
 			count++;	
 		}
 		fclose(fileID);
-		//printf("%s\n", buffer);
 		printf("Loaded training language file %s\n", fileAddress);
+		
 
-		computeSumHV(D, N, sumHV, count, buffer, iMHV, itemMemory);
+		computeSumHV(N, D, sumHV, count, buffer, iMHV, itemMemory);
 		 
 		for(int i=0; i<D; i++) {
 			langAM[t][i] = sumHV[i];
@@ -333,4 +271,95 @@ void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]
 		}
 		//printf("\n");
 	}
+	free(sumHV);
+	free(buffer);
+}
+
+void computeSumHV(int N, int D, int *sumHV, int count, char *buffer, int iMHV[][D], char itemMemory[]) { 
+	int *block = (int *)malloc(N * D * sizeof(int)); 
+	
+	char key;
+	
+	for(int i=0; i<N; i++) {
+		for(int j=0; j<D; j++) {
+			*(block + i*D + j) = 0;
+		}
+	}
+	
+	for(int i=0; i<D; i++) {
+		*(sumHV +i) = 0;
+	}
+	
+	for(int i=0; i<count; i++) {
+		key = buffer[i];
+		circShift(N, D, block);
+		lookupItemMemory(D, iMHV, itemMemory, key, block); 
+		
+		if (i >= N) {
+			int *nGrams;
+			nGrams = (int*)malloc(D * sizeof(int));
+			
+			//assigns nGrams to the first row of block
+			for(int j=0; j<D; j++) {
+				nGrams[j] = *(block + j);
+			}	
+			
+			for(int j=1; j<N; j++) {
+				for(int l=0; l<D; l++) {
+					nGrams[l] = nGrams[l] * (*(block + j*D + l));
+				}
+			}
+			
+			for(int j=0; j<D; j++) {
+				sumHV[j] = sumHV[j] + nGrams[j];
+			}
+			free(nGrams);
+		}
+
+	}
+	free(block);
+}
+void circShift(int n, int d, int *arr) {	
+    int *arr1 = (int *)malloc(n * d * sizeof(int)); 
+
+	//format: *(arr + i*col + j));
+
+	for(int i=0; i<1; i++) {
+		for(int j=0; j<d; j++) {
+			*(arr1 + i*d + j) = *(arr + (n-1)*d + j);
+		}
+	}
+	
+	for(int i=1; i<n; i++) {
+		for(int j=0; j<d; j++) {
+			*(arr1 + i*d + j) = *(arr + (i-1)*d + j);
+		}
+	}
+	
+
+	for(int i=0; i<n; i++) {
+		for(int j=0; j<d-1; j++){
+			*(arr + i*d + (j+1)) = *(arr1 + i*d + j);
+		}
+		
+	}
+	
+	for(int i=0; i<n; i++) {
+		for(int j=d-1; j<d; j++) {
+			*(arr + i*d) = *(arr1 + i*d + (d-1));
+		}
+	}
+
+	free(arr1);
+}
+void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int *block) {
+	for (int i=0; i<27; i++) {
+		if (itemMemory[i] == key) {
+				for(int j=0; j<D; j++) {
+					*(block + j) = iMHV[i][j];
+			}
+			break;
+		}
+	}
+
 }
