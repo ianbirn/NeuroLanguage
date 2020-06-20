@@ -95,7 +95,7 @@ def buildLanguageHV(iM, langHV, langLabels, N, D):
 
 
 if __name__ == '__main__':
-	
+	print('training program')
 	N= int(input('Enter value for N: '))
 	D= int(input('Enter value for D: '))
 	iM = {}

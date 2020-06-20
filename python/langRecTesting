@@ -160,6 +160,7 @@ def testHV(iM, langAM, N, D, langLabels):
 	return accuracy
 
 if __name__ == '__main__':
+	print('testing program')
 	N=int(input('Enter value for N: '))
 	D=int(input('Enter value for D: '))
 	iM = {}
@@ -171,10 +172,11 @@ if __name__ == '__main__':
 	#check if folder exits, if not, break the program
 	path = 'cachedTraining/' + str(D) + '_' + str(N)
 	if  not os.path.isdir(path):
-		break
+		print('folder does not exist!')
+		exit()
 	
 	#read in the training files
-	for arr, name in readTrainingFiles(path):
+	for arr, name in readTrainingFiles(path + '/'):
 		if (name[0:2] == 'im'):
 			newKey = os.path.splitext(name)[0][3:]
 			iM[newKey] = arr
