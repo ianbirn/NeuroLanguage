@@ -3,6 +3,8 @@ import os
 import glob
 import fnmatch
 import time
+
+import csv
 #will read a training file and yield the buffer, looping thru langLabels
 def readLabels(langLabels): 
 	i = 0
@@ -80,22 +82,6 @@ def computeSumHV(text, itemMemory, N, D):
 		i+=1
 	return itemMemory, sumHV
 
-#helper function to turn a language hypervector into a binarized version
-def binarizeHV(v):
-	threshold = 0
-	vsize = v.size
-	for i in range(0,vsize):
-		if v[0,i] > threshold:
-			v[0,i] = 1
-		else:
-			v[0,i] = -1
-	return v
-
-#compute the similarity between two hypervectors
-def cosAngle(u, v):
-	cos = np.dot(u[0,:], v[0,:]) / (np.linalg.norm(u) * np.linalg.norm(v))
-	return cos
-
 #read in training files and computeSumHV on them
 def buildLanguageHV(iM, langHV, langLabels, N, D):
 	for data, i in readLabels(langLabels):
@@ -107,75 +93,35 @@ def buildLanguageHV(iM, langHV, langLabels, N, D):
 	print(langAM)
 	return iM, langAM
 
-#read testing files and calculate the similarities between them and the 
-#language hypervectors and output the accuracy
-def testHV(iM, langAM, N, D, langLabels):
-	langMap = {}
-	langMap ['af'] = 'afr'
-	langMap ['bg'] = 'bul'
-	langMap ['cs'] = 'ces'
-	langMap ['da'] = 'dan'
-	langMap ['nl'] = 'nld'
-	langMap ['de'] = 'deu'
-	langMap ['en'] = 'eng'
-	langMap ['et'] = 'est'
-	langMap ['fi'] = 'fin'
-	langMap ['fr'] = 'fra'
-	langMap ['el'] = 'ell'
-	langMap ['hu'] = 'hun'
-	langMap ['it'] = 'ita'
-	langMap ['lv'] = 'lav'
-	langMap ['lt'] = 'lit'
-	langMap ['pl'] = 'pol'
-	langMap ['pt'] = 'por'
-	langMap ['ro'] = 'ron'
-	langMap ['sk'] = 'slk'
-	langMap ['sl'] = 'slv'
-	langMap ['es'] = 'spa'
-	langMap ['sv'] = 'swe'
-	total = 0
-	correct = 0
-	count=0
-	for text, name in readTestFiles('../testing_texts/'):
-		print('reading ' + str(name))
-		actualLabel = name[0:2]
-		
-		iMn, textHV = computeSumHV(text, iM, N, D)
-		textHV = binarizeHV(textHV)
-
-		if np.not_equal(iM, iMn):
-			print("NEW UNSEEN ITEM IN TEST FILE")
-			break
-		else:
-			maxAngle = -1
-			for label in langLabels:
-				angle = cosAngle(langAM[label], textHV)
-				if angle > maxAngle:
-					maxAngle = angle
-					predicLang = label
-			if predicLang == langMap[actualLabel]:
-				correct+=1
-			else:
-				print(str(langMap[actualLabel] + '--->' + predicLang))
-			total+=1
-		
-		accuracy = correct / total
-		
-	return accuracy
 
 if __name__ == '__main__':
-	start_time = time.time()
-	N=4
-	D=10000
+	print('training program')
+	N= int(input('Enter value for N: '))
+	D= int(input('Enter value for D: '))
 	iM = {}
 	langAM = {}
 	langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
 	
+	start_time = time.time()
+	
 	iM, langAM = buildLanguageHV(iM, langAM, langLabels, N, D)
 	
-	#testing the function
+	#check if folder exists, create or clear it
+	path = 'cachedTraining/' + str(D) + '_' + str(N)
+	if not os.path.isdir(path):
+		os.mkdir(path)
 	
-	accuracy = testHV(iM, langAM, N, D, langLabels)
+	#write itemMemory
+	for key, value in iM.items():
+		filename = 'im_' + key + '.csv'
+		with open(path + '/' + filename, 'w') as thefile:
+			np.savetxt(thefile, value, delimiter=',')
+
+	for key, value in langAM.items():
+		filename = 'la_' + key + '.csv'
+		with open(path + '/' + filename, 'w') as thefile:
+			np.savetxt(thefile, value, delimiter=',')
+	
 	
 	end_time = time.time()
 	

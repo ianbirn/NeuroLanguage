@@ -32,6 +32,13 @@ def readTestFiles(path):
 				buff.append(row)
 			yield np.array(buff, dtype='str'), textFile
 	
+def readTrainingFiles(path): 
+	pattern = '*.csv'
+	for textFile in os.listdir(path):
+		if fnmatch.fnmatch(textFile, pattern):
+			with open(os.path.join(path, textFile)) as thefile:
+				buff = np.loadtxt(thefile, delimiter=',')
+				yield buff, textFile
 
 
 
@@ -93,19 +100,8 @@ def binarizeHV(v):
 
 #compute the similarity between two hypervectors
 def cosAngle(u, v):
-	cos = np.dot(u[0,:], v[0,:]) / (np.linalg.norm(u) * np.linalg.norm(v))
+	cos = np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
 	return cos
-
-#read in training files and computeSumHV on them
-def buildLanguageHV(iM, langHV, langLabels, N, D):
-	for data, i in readLabels(langLabels):
-		iM, langHV = computeSumHV(data, iM, N, D)
-		langAM[langLabels[i]] = langHV
-		print('file read')
-		
-	print(iM)
-	print(langAM)
-	return iM, langAM
 
 #read testing files and calculate the similarities between them and the 
 #language hypervectors and output the accuracy
@@ -149,7 +145,7 @@ def testHV(iM, langAM, N, D, langLabels):
 		else:
 			maxAngle = -1
 			for label in langLabels:
-				angle = cosAngle(langAM[label], textHV)
+				angle = cosAngle(langAM[label], textHV[0,:])
 				if angle > maxAngle:
 					maxAngle = angle
 					predicLang = label
@@ -164,19 +160,38 @@ def testHV(iM, langAM, N, D, langLabels):
 	return accuracy
 
 if __name__ == '__main__':
-	start_time = time.time()
-	N=4
-	D=10000
+	print('testing program')
+	N=int(input('Enter value for N: '))
+	D=int(input('Enter value for D: '))
 	iM = {}
 	langAM = {}
 	langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
 	
-	iM, langAM = buildLanguageHV(iM, langAM, langLabels, N, D)
+	start_time = time.time()
 	
+	#check if folder exits, if not, break the program
+	path = 'cachedTraining/' + str(D) + '_' + str(N)
+	if  not os.path.isdir(path):
+		print('folder does not exist!')
+		exit()
+	
+	#read in the training files
+	for arr, name in readTrainingFiles(path + '/'):
+		if (name[0:2] == 'im'):
+			newKey = os.path.splitext(name)[0][3:]
+			iM[newKey] = arr
+		if (name[0:2] == 'la'):
+			newKey = os.path.splitext(name)[0][3:]
+			langAM[newKey] = arr
+	
+	print(iM)
+	print(langAM)
 	#testing the function
 	
 	accuracy = testHV(iM, langAM, N, D, langLabels)
 	
 	end_time = time.time()
+	
+	print(accuracy)
 	
 	print('the program took ' + str(end_time-start_time) + ' seconds to run')
