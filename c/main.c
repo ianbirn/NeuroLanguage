@@ -31,14 +31,14 @@ int main() {
     gettimeofday(&start, NULL);                                            //comment out to not time
 	train(N, D, itemMemory, imSize, imhv, langLabels, length);
     gettimeofday(&end, NULL);                                       //comment out to not time
-    
-    trainTime = (end.tv_sec - start.tv_sec) * 1e6; 
-    trainTime = (trainTime + (end.tv_usec - start.tv_usec)) * 1e-6; 
 
     gettimeofday(&start2, NULL);                                                //comment out to not time
 	storeLangAM(N, D, langAM, length, langLabels);
 	test(N, D, langAM, imhv, itemMemory, imSize);
     gettimeofday(&end2, NULL);                                           //comment out to not time
+    
+    trainTime = (end.tv_sec - start.tv_sec) * 1e6; 
+    trainTime = (trainTime + (end.tv_usec - start.tv_usec)) * 1e-6; 
     testTime = (end2.tv_sec - start2.tv_sec) * 1e6; 
     testTime = (testTime + (end2.tv_usec - start2.tv_usec)) * 1e-6;                    //comment out to not time
 
