@@ -6,7 +6,8 @@
 #include <sys/time.h>
 
 int main() {
-/**For timing purposes, if you wish to not time, then comment out the following and other instances**/
+/**For timing purposes, if you wish to not time, then comment out the following and other instances**/	
+srand(time(0));
     struct timeval start, end; 
     struct timeval start2, end2; 
     double trainTime;
