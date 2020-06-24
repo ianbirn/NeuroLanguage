@@ -4,10 +4,11 @@
 #include "computations.h"
 #include "test.h"
 #include <sys/time.h>
+#include <time.h>
 
 int main() {
-/**For timing purposes, if you wish to not time, then comment out the following and other instances**/	
-srand(time(0));
+    srand(time(0));
+/**For timing purposes, if you wish to not time, then comment out the following and other instances**/
     struct timeval start, end; 
     struct timeval start2, end2; 
     double trainTime;
@@ -15,7 +16,7 @@ srand(time(0));
 /****************************************************************************************************/
 
 /**These values can be altered to best speed/accuracy ratings**/    
-    int N = 4;
+    int N = 3;
     int D = 10000;
 
 /**The following are declarations and are determined based on what languages you wish to use. Currently, 
