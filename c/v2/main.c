@@ -15,8 +15,8 @@ int main() {
 /****************************************************************************************************/
 
 /**These values can be altered to best speed/accuracy ratings**/    
-    int N = 3;
-    int D = 1000;
+    int N = 4;
+    int D = 10000;
 
 /**The following are declarations and are determined based on what languages you wish to use. Currently, 
       the default is the latin alphabet and the 22 European languages pulled in ../training_texts.  **/
@@ -24,8 +24,8 @@ int main() {
     int imSize = sizeof(itemMemory);
 	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
     char fullName[][11] = {
-        "Afrikaanas", "Bulgarian", "Czech", "Danish", "Dutch", "German", "English", "Estonian", "Finnish", "French", "French",
-        "Greek", "Hungarian", "Italian", "Latvian", "Lithuanian", "Polish", "Portugese", "Romanian", "Slovenian", "Swedish"};
+        "Afrikaanas", "Bulgarian", "Czech", "Danish", "Dutch", "German", "English", "Estonian", "Finnish", "French", "Greek", 
+        "Hungarian", "Italian", "Latvian", "Lithuanian", "Norwegian", "Polish", "Portugese", "Romanian", "Slovak", "Slovenian", "Spanish", "Swedish"};
 	int length =  (sizeof langLabels)/(sizeof langLabels[0]); //size of langLabels
 /******************************************************************************************************/
 

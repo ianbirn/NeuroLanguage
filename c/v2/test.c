@@ -16,14 +16,14 @@ void storeLangAM(int N, int D, int *langAM, int length, char langLabels[][4]) {
     snprintf(cachedND, 24, "%s%d%s%d%s", "cachedTraining/", D, "_", N, "/");        //Directory information for cache
 
 	for(int i=0; i<length; i++) {
-		snprintf(fileAddress, 34, "%s%s%c%c%c%s", cachedND, "la_", langLabels[i][0], langLabels[i][1], langLabels[i][2], ".txt");
-		laf = fopen(fileAddress, "r");
+		snprintf(fileAddress, 34, "%s%s%s%s", cachedND, "la_", langLabels[i], ".bin");
+		laf = fopen(fileAddress, "rb");
 		if (laf == NULL) {
 			fclose(laf);
 			break;
 		}
 		for(int j=0; j<D; j++){
-			fscanf(laf, "%i", &(*(langAM + i*D + j)));
+			fread(&(*(langAM + i*D + j)), sizeof(int), 1, laf);
 		}
 		fclose(laf);
 	}
@@ -107,11 +107,13 @@ void test(int N, int D, int *langAM, int *imhv, char itemMemory[], int imSize, c
 		while(1) {
 			buffer[count] = fgetc(fileID);
 			if(feof(fileID)) {
+				buffer[count] = '\0';	//ending string, closing file
 				break;
 			}
 			count++;
 		}
-		buffer[count] = '\0';	//ending string, closing file
+		
+		removeChar(buffer, '\n');
 
 		fclose(fileID);
 		printf("Loaded: %s\n", fileAddress);

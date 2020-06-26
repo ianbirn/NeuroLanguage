@@ -21,16 +21,16 @@ void loadiM(int D, int imSize, char cachedND[], char itemMemory[]) {
 		randomHV = (int*)malloc(D * sizeof(int));
 			
         if (itemMemory[i] == ' ') {
-            snprintf(fiAd, 34, "%s%s", cachedND, "im__.txt");
+            snprintf(fiAd, 34, "%s%s", cachedND, "im__.bin");
         }
         else {
-            snprintf(fiAd, 34, "%s%s%c%s", cachedND, "im_", itemMemory[i], ".txt");
+            snprintf(fiAd, 34, "%s%s%c%s", cachedND, "im_", itemMemory[i], ".bin");
         }
 			
-		fileID = fopen(fiAd, "w");
+		fileID = fopen(fiAd, "wb");
 		genRandomHV(D, randomHV);
 		for(int j=0; j<D; j++) {
-			fprintf(fileID, "%i ", randomHV[j]); 
+			fwrite(&randomHV[j], sizeof(int), 1, fileID); 
 		}
 		
 		fclose(fileID);
@@ -43,16 +43,16 @@ void createIMHV(int D, int imSize, char itemMemory[], char cachedND[], int *imhv
 
     for(int i=0; i<imSize; i++) {                                   //Loads the HVs from the character text files into an array (for speed purposes)
         if (itemMemory[i] == ' ') {
-            snprintf(imAddress, 34, "%s%s", cachedND, "im__.txt");
+            snprintf(imAddress, 34, "%s%s", cachedND, "im__.bin");
         }
         else {
-            snprintf(imAddress, 34, "%s%s%c%s", cachedND, "im_", itemMemory[i], ".txt");
+            snprintf(imAddress, 34, "%s%s%c%s", cachedND, "im_", itemMemory[i], ".bin");
         }
 
-        imf = fopen(imAddress, "r");
+        imf = fopen(imAddress, "rb");
         for(int j=0; j<D; j++) {
             int num=0;
-            fscanf(imf, "%i", &num);
+			fread(&num, sizeof(int), 1, imf); 
             *(imhv + i*D + j) = num;
         }
         fclose(imf);
@@ -76,9 +76,9 @@ void buildLangHV(int N, int D, int length, char langLabels[][4], char cachedND[]
 		    exit(1);
 	    }
 
-        snprintf(fileAddress, 110, "%s%s%s", "../../training_texts/", langLabels[i], ".txt");
+        snprintf(fileAddress, 110, "%s%s%s", "../../trainingv2/", langLabels[i], ".bin");
 
-        langf = fopen(fileAddress, "r");
+        langf = fopen(fileAddress, "rb");
 
 	    if (langf == NULL) {
 		    printf("Failed: File could not be opened.\n");
@@ -87,25 +87,25 @@ void buildLangHV(int N, int D, int length, char langLabels[][4], char cachedND[]
 
 	    int count=0;
 	    while(1) {
-		    buffer[count] = fgetc(langf);
+			fread(&buffer[count], sizeof(char), 1, langf); 
 		    if(feof(langf)) {
 			    buffer[count] = '\0';
 			    break;
 		    }
 		    count++;	
 	    }
+		removeChar(buffer, '\n');
 	
 	    fclose(langf);
 	    printf("Loading %s\n", fileAddress);
-
         computeSumHV(N, D, sumHV, count, buffer, imhv, itemMemory, imSize);
 
 		char fiAd[34];                          //fileID for sumHV of lang
-        snprintf(fiAd, 34, "%s%s%c%c%c%s", cachedND, "la_", langLabels[i][0], langLabels[i][1], langLabels[i][2], ".txt");	
-		fileID = fopen(fiAd, "w");
+        snprintf(fiAd, 34, "%s%s%c%c%c%s", cachedND, "la_", langLabels[i][0], langLabels[i][1], langLabels[i][2], ".bin");	
+		fileID = fopen(fiAd, "wb");
 
         for(int j=0; j<D; j++) {
-            fprintf(fileID, "%i ", sumHV[j]);
+			fwrite(&sumHV[j], sizeof(int), 1, fileID); 
         }
 
 		fclose(fileID);
@@ -130,13 +130,13 @@ void train(int N, int D, char itemMemory[], int imSize, int *imhv, char langLabe
         if (ndDir){
 			for(int i=0; i<imSize; i++) {      		//Checks that all of the im files exist
 				if (itemMemory[i] == ' ') {
-					snprintf(fileAddress, 34, "%s%s", cachedND, "im__.txt");
+					snprintf(fileAddress, 34, "%s%s", cachedND, "im__.bin");
 				}
 				else {
-					snprintf(fileAddress, 34, "%s%s%c%s", cachedND, "im_", itemMemory[i], ".txt");
+					snprintf(fileAddress, 34, "%s%s%c%s", cachedND, "im_", itemMemory[i], ".bin");
 				}
 
-				fileID = fopen(fileAddress, "r"); 
+				fileID = fopen(fileAddress, "rb"); 
 				if (fileID == NULL) {
 					loadiM(D, imSize, cachedND, itemMemory);
 					fclose(fileID);
@@ -149,8 +149,8 @@ void train(int N, int D, char itemMemory[], int imSize, int *imhv, char langLabe
 			createIMHV(D, imSize, itemMemory, cachedND, imhv);
 
 			for(int i=0; i<length; i++) {
-				snprintf(fileAddress, 34, "%s%s%c%c%c%s", cachedND, "la_", langLabels[i][0], langLabels[i][1], langLabels[i][2], ".txt");
-				fileID = fopen(fileAddress, "r");
+				snprintf(fileAddress, 34, "%s%s%c%c%c%s", cachedND, "la_", langLabels[i][0], langLabels[i][1], langLabels[i][2], ".bin");
+				fileID = fopen(fileAddress, "rb");
 				if (fileID == NULL) {
 					buildLangHV(N, D, length, langLabels, cachedND, imSize, itemMemory, imhv);
 					fclose(fileID);

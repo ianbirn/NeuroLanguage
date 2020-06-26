@@ -1,7 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
+void removeChar(char *s, int c){ 
+  
+    int j, n = strlen(s); 
+    for (int i=j=0; i<n; i++) 
+       if (s[i] != c) 
+          s[j++] = s[i]; 
+      
+    s[j] = '\0'; 
+} 
 void perm(int D, int *arr) {	
 	//Initialize Array
 	for(int i=0; i<D; i++) {

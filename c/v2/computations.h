@@ -1,5 +1,7 @@
 #ifndef COMPUTATIONS_H
 #define COMPUTATIONS_H
+/**Used to remove new line characters to not hurt accuracy*/
+void removeChar(char *s, int c);
 
 /**Creates an array of values 1-D in a random order**/
 void perm(int D, int *arr);
