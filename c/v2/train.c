@@ -76,7 +76,7 @@ void buildLangHV(int N, int D, int length, char langLabels[][4], char cachedND[]
 		    exit(1);
 	    }
 
-        snprintf(fileAddress, 110, "%s%s%s", "../../trainingv2/", langLabels[i], ".bin");
+        snprintf(fileAddress, 110, "%s%s%s", "../../training_bin/", langLabels[i], ".bin");
 
         langf = fopen(fileAddress, "rb");
 
