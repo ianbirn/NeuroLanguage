@@ -171,6 +171,7 @@ if __name__ == '__main__':
 	
 	#check if folder exits, if not, break the program
 	path = 'cachedTraining/' + str(D) + '_' + str(N)
+	print(path)
 	if  not os.path.isdir(path):
 		print('folder does not exist!')
 		exit()

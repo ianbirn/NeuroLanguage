@@ -1,3 +1,4 @@
+from tkinter import *
 import numpy as np
 import os
 import glob
@@ -76,7 +77,7 @@ def computeSumHV(text, itemMemory, N, D):
 	for key in getKeys(text):
 		block = np.roll(block, 1, [0,1])
 		
-		block[0,:] = itemMemory[key]
+		itemMemory, block[0,:] = lookupItemMemory(itemMemory, key, D)
 		
 		if i >= N:
 			nGrams = block[0, :]
@@ -105,72 +106,38 @@ def cosAngle(u, v):
 
 #read testing files and calculate the similarities between them and the 
 #language hypervectors and output the accuracy
-def testHV(iM, langAM, N, D, langLabels):
-	langMap = {}
-	langMap ['af'] = 'afr'
-	langMap ['bg'] = 'bul'
-	langMap ['cs'] = 'ces'
-	langMap ['da'] = 'dan'
-	langMap ['nl'] = 'nld'
-	langMap ['de'] = 'deu'
-	langMap ['en'] = 'eng'
-	langMap ['et'] = 'est'
-	langMap ['fi'] = 'fin'
-	langMap ['fr'] = 'fra'
-	langMap ['el'] = 'ell'
-	langMap ['hu'] = 'hun'
-	langMap ['it'] = 'ita'
-	langMap ['lv'] = 'lav'
-	langMap ['lt'] = 'lit'
-	langMap ['pl'] = 'pol'
-	langMap ['pt'] = 'por'
-	langMap ['ro'] = 'ron'
-	langMap ['sk'] = 'slk'
-	langMap ['sl'] = 'slv'
-	langMap ['es'] = 'spa'
-	langMap ['sv'] = 'swe'
-	total = 0
-	correct = 0
-	count=0
-	for text, name in readTestFiles('../testing_texts/'):
-		print('reading ' + str(name))
-		actualLabel = name[0:2]
+def testHV(iM, langAM, N, D, langLabels, s):
+	accuracy = {}
+	
+	iMn, textHV = computeSumHV(s, iM, N, D)
+	textHV = binarizeHV(textHV)
+	
+	if np.not_equal(iM, iMn):
+		print('------NEW ITEM IN TEST SENTENCE-----')
+	else:
+		maxAngle = -1
+		for label in langLabels:
+			angle = cosAngle(langAM[label], textHV[0,:])
+			accuracy[label] = angle
 		
-		iMn, textHV = computeSumHV(text, iM, N, D)
-		textHV = binarizeHV(textHV)
-
-		if np.not_equal(iM, iMn):
-			print("NEW UNSEEN ITEM IN TEST FILE")
-			break
-		else:
-			maxAngle = -1
-			for label in langLabels:
-				angle = cosAngle(langAM[label], textHV[0,:])
-				if angle > maxAngle:
-					maxAngle = angle
-					predicLang = label
-			if predicLang == langMap[actualLabel]:
-				correct+=1
-			else:
-				print(str(langMap[actualLabel] + '--->' + predicLang))
-			total+=1
-		
-		accuracy = correct / total
-		
-	return accuracy
+	return accuracy #returns unsorted list of every language and the label
+	
+def buttonClicked(newSen):
+	s = newSen.get()
+	return 
 
 if __name__ == '__main__':
-	print('testing program')
-	N=int(input('Enter value for N: '))
-	D=int(input('Enter value for D: '))
 	iM = {}
 	langAM = {}
 	langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
 	
 	start_time = time.time()
 	
+	D=1000
+	N=3
 	#check if folder exits, if not, break the program
 	path = 'cachedTraining/' + str(D) + '_' + str(N)
+	print(path)
 	if  not os.path.isdir(path):
 		print('folder does not exist!')
 		exit()
@@ -186,12 +153,29 @@ if __name__ == '__main__':
 	
 	print(iM)
 	print(langAM)
-	#testing the function
 	
-	accuracy = testHV(iM, langAM, N, D, langLabels)
 	
-	end_time = time.time()
+	a={}
 	
-	print(accuracy)
+	#create parent window
+	root = Tk()
+	#root.geometry('500x400')
 	
-	print('the program took ' + str(end_time-start_time) + ' seconds to run')
+	
+	#labels
+	Label(root, text='testing function for HD language recognition').grid(row=0, pady=5)
+	Label(root, text='enter sentence of an unknown language:').grid(row=2, padx = 2)
+	
+	#entry boxes
+	newSen = Entry(root)
+	newSen.grid(row=3)
+		
+	
+	#buttons
+	Button(root, text='test!', command=lambda a:buttonClicked).grid(row =4)
+	Button(root, text='quit!', command=root.quit).grid(row=4, column=1)
+	
+	
+	root.mainloop()
+	
+	
