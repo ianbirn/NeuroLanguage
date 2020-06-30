@@ -122,9 +122,9 @@ def testHV(iM, langAM, N, D, langLabels, s):
 		
 	return accuracy #returns unsorted list of every language and the label
 	
-def buttonClicked(newSen):
+def buttonClicked(newSen, iM, langAM, N, D, langLabels):
 	s = newSen.get()
-	return 
+	return testHV(iM, langAM, N, D, s)
 
 if __name__ == '__main__':
 	iM = {}
@@ -172,7 +172,7 @@ if __name__ == '__main__':
 		
 	
 	#buttons
-	Button(root, text='test!', command=lambda a:buttonClicked).grid(row =4)
+	Button(root, text='test!', command=lambda newSen:buttonClicked(newSen)).grid(row =4)
 	Button(root, text='quit!', command=root.quit).grid(row=4, column=1)
 	
 	
