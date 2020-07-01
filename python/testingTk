@@ -107,7 +107,7 @@ def cosAngle(u, v):
 #read testing files and calculate the similarities between them and the 
 #language hypervectors and output the accuracy
 def testHV(iM, langAM, N, D, langLabels, s):
-	accuracy = {}
+	accuracy={}
 	
 	iMn, textHV = computeSumHV(s, iM, N, D)
 	textHV = binarizeHV(textHV)
@@ -120,11 +120,7 @@ def testHV(iM, langAM, N, D, langLabels, s):
 			angle = cosAngle(langAM[label], textHV[0,:])
 			accuracy[label] = angle
 		
-	return accuracy #returns unsorted list of every language and the label
-	
-def buttonClicked(newSen, iM, langAM, N, D, langLabels):
-	s = newSen.get()
-	return testHV(iM, langAM, N, D, s)
+	return(accuracy) #returns unsorted list of every language and the label
 
 if __name__ == '__main__':
 	iM = {}
@@ -154,6 +150,8 @@ if __name__ == '__main__':
 	print(iM)
 	print(langAM)
 	
+
+	
 	
 	a={}
 	
@@ -165,17 +163,23 @@ if __name__ == '__main__':
 	#labels
 	Label(root, text='testing function for HD language recognition').grid(row=0, pady=5)
 	Label(root, text='enter sentence of an unknown language:').grid(row=2, padx = 2)
+	outDisplay = Label(root).grid(row=3)	
+	
 	
 	#entry boxes
 	newSen = Entry(root)
 	newSen.grid(row=3)
 		
+	def updateOutput():
+		acc = testHV(iM, langAM, N, D, langLabels, newSen.get())
+		outDisplay.configure(text=str(acc))
+		
+		##TODO ---------- create a method to update the text box properly and format the dictionary to be printed
 	
 	#buttons
-	Button(root, text='test!', command=lambda newSen:buttonClicked(newSen)).grid(row =4)
+	Button(root, text='test!', command=lambda: updateOutput()).grid(row =4)
 	Button(root, text='quit!', command=root.quit).grid(row=4, column=1)
 	
 	
+		
 	root.mainloop()
-	
-	
