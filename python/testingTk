@@ -106,7 +106,7 @@ def cosAngle(u, v):
 
 #read testing files and calculate the similarities between them and the 
 #language hypervectors and output the accuracy
-def testHV(iM, langAM, N, D, langLabels, s):
+def testHV(iM, langAM, N, D, langLabels, s, root):
 	accuracy={}
 	
 	iMn, textHV = computeSumHV(s, iM, N, D)
@@ -120,7 +120,18 @@ def testHV(iM, langAM, N, D, langLabels, s):
 			angle = cosAngle(langAM[label], textHV[0,:])
 			accuracy[label] = angle
 		
-	return(accuracy) #returns unsorted list of every language and the label
+	###### create new window and have it print out the top results ######
+	
+	listWindow = Toplevel(root)
+	
+	## sort the list
+	sortAccuracy = sorted(accuracy.items(), key=lambda kv:(kv[1], kv[0]), reverse=True)
+	
+	## create the text
+	t = ''
+	for key, value in sortAccuracy:
+		t+=str(key) + ' ' + str(value) + '\n'
+	Label(listWindow, text=t).grid(row=0, pady=5, padx=5)
 
 if __name__ == '__main__':
 	iM = {}
@@ -170,14 +181,9 @@ if __name__ == '__main__':
 	newSen = Entry(root)
 	newSen.grid(row=3)
 		
-	def updateOutput():
-		acc = testHV(iM, langAM, N, D, langLabels, newSen.get())
-		outDisplay.configure(text=str(acc))
-		
-		##TODO ---------- create a method to update the text box properly and format the dictionary to be printed
 	
 	#buttons
-	Button(root, text='test!', command=lambda: updateOutput()).grid(row =4)
+	Button(root, text='test!', command=lambda: testHV(iM, langAM, N, D, langLabels, newSen.get(), root)).grid(row =4)
 	Button(root, text='quit!', command=root.quit).grid(row=4, column=1)
 	
 	
