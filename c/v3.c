@@ -30,8 +30,8 @@ int main() {
     int imSize = ((byteSize-27)/2)+27;
     char *itemMemory = (char*)malloc(byteSize * sizeof(char));
 	//char langLabels[][4] = {"afr", "ces", "dan", "deu", "nld", "eng", "est", "fin", "fra", "hun", "isl", "ita", "lat", "lit", "nor", "pol", "por", "rom", "slk", "slv", "spa", "swe"};
-    char langLabels[][4] = {"afr", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "hun", "isl", "ita", "lat", "lit", "nor", "pol", "por", "rom", "slk", "slv", "spa", "swe"};
-    char fileLabel[][3] = {"af", "cs", "da", "nl", "de", "en", "et", "fi", "fr", "hu", "is", "it", "lv", "lt", "no", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
+    char langLabels[][4] = {"afr", "ces", "dan", "deu", "nld", "eng", "est", "fin", "fra", "hun", "ita", "lat", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
+    char fileLabel[][3] = {"af", "cs", "da", "de", "nl", "en", "et", "fi", "fr", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
 	int length =  (sizeof langLabels)/(sizeof langLabels[0]); //size of langLabels
     int *langAM = (int*)malloc(length * D * sizeof(int));
     char fileAd[273];
@@ -90,10 +90,7 @@ int main() {
         int count=0;
         while(1) {
             buffer[count] = fgetc(f);
-            if (buffer[count] == '\n') {
-                buffer[count] == ' ';
-            }
-		    else if(feof(f)) {
+		    if(feof(f)) {
 	  	        buffer[count] = '\0';
 		        break;
 		    }
@@ -105,36 +102,34 @@ int main() {
 
         for(int i=0; i<D; i++) {
             *(langAM + l*D + i) = sumHV[i];
+            //printf("%i ", *(langAM + l*D + i));
         }
+        //printf("\n");
         free(sumHV);
         free(buffer);
     }
 
-    int total=0; int correct=0; int correct2=0; int correct3=0;
-    double accuracy=0.0;
-    dir = opendir("../newTesting/");
+    int total=0; int correct=0; int correct2=0;
+    double accuracy=0.0; double accuracy2=0.0;
+    dir = opendir("../test_expand/");
 
     if (dir == NULL) {
         printf("Failed: Directory could not be openned.\n");
         exit(1);
     }
-
 	while((sd=readdir(dir)) != NULL) {
         int *testSumHV = (int*)malloc(D * sizeof(int));
         char *buff = (char*)malloc(3000000 * sizeof(char));
         char *predicLang = (char*)malloc(3 * sizeof(char));
         char *predicLang2 = (char*)malloc(3 * sizeof(char));
-        char *predicLang3 = (char*)malloc(3 * sizeof(char));
-        double angle=0.0;
-        double angle2=0.0;
-        double angle3=0.0;
-        double maxAngle = -1.0;
+        double maxAngle = -1.0; double angle2=0.0; double diff=0.0;
+        int newSize=0;
         if (!strcmp (sd->d_name, "."))
             continue;
         if (!strcmp (sd->d_name, ".."))    
             continue;
         
-        snprintf(fileAd, 273, "%s%s", "../newTesting/", sd->d_name);
+        snprintf(fileAd, 273, "%s%s", "../test_expand/", sd->d_name);
         f = fopen(fileAd, "r");
         int c=0;
         while(1) {
@@ -149,13 +144,14 @@ int main() {
             c++;
         }
         fclose(f);
-        cleanText(buff, c, itemMemory, imSize, byteSize);
+        //cleanText(buff, c, itemMemory, imSize, byteSize);
         printf("Loaded %s\n", fileAd);
 
         computeSumHV(N, D, testSumHV, buff, c, itemMemory, iMHV, byteSize);
         binarizeHV(testSumHV, D);
 
         for(int l=0; l<length; l++) {
+            double angle=0.0;
             int *tmp = (int*)malloc(D * sizeof(int));
             
             for(int i=0; i<D; i++) {
@@ -163,55 +159,45 @@ int main() {
             }
 
             angle = cosAngle(tmp, testSumHV, D);
+            //printf("%s\t%.3f\n", langLabels[l], angle);
 
             if (angle > maxAngle) {
-                angle3 = angle2;
-                angle2 = angle;
+                angle2 = maxAngle;
                 maxAngle = angle;
-                sprintf(predicLang3, "%s", predicLang2);
-                sprintf(predicLang2, "%s", predicLang);
+                //sprintf(predicLang2, "%s", predicLang);
                 sprintf(predicLang, "%s", fileLabel[l]);
             }
-            else if(angle > angle2) {
-                angle3 = angle2;
+            /*else if (angle > angle2) {
                 angle2 = angle;
-                sprintf(predicLang3, "%s", predicLang2);
                 sprintf(predicLang2, "%s", fileLabel[l]);
-            }
-            else if(angle > angle3) {
-                angle3 = angle;
-                sprintf(predicLang3, "%s", fileLabel[l]);
-            }
+            }*/
             free(tmp);
         }
 
+        //printf("%s\n", predicLang);
 
         if (((sd->d_name)[0] == predicLang[0]) && ((sd->d_name)[1] == predicLang[1])) {
             correct++;
         }
-        else if (((sd->d_name)[0] == predicLang2[0]) && ((sd->d_name)[1] == predicLang2[1])) {
+        /*else if (((sd->d_name)[0] == predicLang2[0]) && ((sd->d_name)[1] == predicLang2[1])) { 
+            printf("%s\n", predicLang);
             correct2++;
-        } 
-        else if (((sd->d_name)[0] == predicLang3[0]) && ((sd->d_name)[1] == predicLang3[1])) {
-            correct3++;
-        }
+        }*/
 
         total++;
         free(predicLang);
         free(predicLang2);
-        free(predicLang3);
         free(buff);  
         free(testSumHV);
     }
     closedir(dir);
 
     accuracy = (((double)correct)/((double)total)) * 100;
-    printf("Accuracy: %.3f\n", accuracy);
-    accuracy = (((double)correct2)/((double)total)) * 100;
-    printf("Accuracy: %.3f\n", accuracy);
-    accuracy = (((double)correct3)/((double)total)) * 100;
-    printf("Accuracy: %.3f\n", accuracy);
-    
+    printf("First Guess: %.3f\t", accuracy);
+    //accuracy2 = (((double)correct2)/((double)total)) * 100;
+    //printf("Second Guess: %.3f\tRemainder: %.3f", accuracy2, (100-(accuracy+accuracy2)));
+
+
     free(iMHV);
     free(alpha);
     free(itemMemory);
@@ -221,6 +207,7 @@ int main() {
 void cleanText(char *buffer, int size, char *itemMemory, int imSize, int byteSize) {
     char *alpha = (char*)malloc(byteSize * sizeof(char));
     FILE *f;
+    int newSize=0;
 
     f = fopen("alpha.txt", "r");
     int x=0;
@@ -249,7 +236,9 @@ void cleanText(char *buffer, int size, char *itemMemory, int imSize, int byteSiz
         removeChar(buffer, num);
     }
 
-    for(int i=0; i<size; i++) {
+    newSize = strlen(buffer);
+
+    for(int i=0; i<newSize; i++) {
         for(int j=0; j<27; j++) {
             if(alpha[j] == buffer[i]) {
                 buffer[i] = itemMemory[j];
@@ -319,11 +308,8 @@ void computeSumHV(int N, int D, int *sumHV, char *buffer, int count, char *itemM
     }
 
     for(int i=0; i<count; i++) {
-        //printf("%i\t", i);
         circShift(N, D, block);
-        //printf("%i ", i);
         i = lookupItemMemory(D, block, buffer, i, itemMemory, iMHV, byteSize);
-        //printf("\t");
 
         if (i >= N) {
             int *nGrams;
