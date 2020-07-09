@@ -1,6 +1,0 @@
-<="010">
-Hlasování
-<="245" =">
-Dalším bodem programu je hlasování.
-
-(Výsledek a další podrobnosti hlasování: viz zápis)
