@@ -1,0 +1,1 @@
+ausnahmen sind nur in genau definierten fällen erlaubt
