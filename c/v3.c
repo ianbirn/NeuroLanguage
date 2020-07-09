@@ -9,8 +9,8 @@
 void perm(int D, int *arr);
 void genRandomHV(int D, int *randomHV);
 void circShift(int n, int d, int *arr);
-int lookupItemMemory(int D, int *block, char *buffer, int index, char *itemMemory, int *iMHV, int byteSize);
-void computeSumHV(int N, int D, int *sumHV, char *buffer, int count, char *itemMemory, int *iMHV, int byteSize);
+int lookupItemMemory(int D, int *block, char *buffer, int index, char *itemMemory, int *iMHV, int byteSize, char *imBG, int bgSize);
+void computeSumHV(int N, int D, int *sumHV, char *buffer, int count, char *itemMemory, int *iMHV, int byteSize, char *imBG, int bgSize);
 void binarizeHV(int *v, int szofv);
 double norm(int *a, int n);
 double dotProduct(int *a, int *b, int n);
@@ -27,11 +27,13 @@ int main() {
     int D = 10000;
     int N = 3;
     const int byteSize = 165;
-    int imSize = ((byteSize-27)/2)+27;
+    const int bgSize = 118;
+    const int imSize = 155;
     char *itemMemory = (char*)malloc(byteSize * sizeof(char));
+    char *imBG = (char*)malloc(bgSize * sizeof(char));
 	//char langLabels[][4] = {"afr", "ces", "dan", "deu", "nld", "eng", "est", "fin", "fra", "hun", "isl", "ita", "lat", "lit", "nor", "pol", "por", "rom", "slk", "slv", "spa", "swe"};
-    char langLabels[][4] = {"afr", "ces", "dan", "deu", "nld", "eng", "est", "fin", "fra", "hun", "ita", "lat", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
-    char fileLabel[][3] = {"af", "cs", "da", "de", "nl", "en", "et", "fi", "fr", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
+    char langLabels[][4] = {"afr", "bul", "ces", "dan", "deu", "nld", "ell", "eng", "est", "fin", "fra", "hun", "ita", "lat", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
+    char fileLabel[][3] = {"af", "bg", "cs", "da", "de", "nl", "el", "en", "et", "fi", "fr", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
 	int length =  (sizeof langLabels)/(sizeof langLabels[0]); //size of langLabels
     int *langAM = (int*)malloc(length * D * sizeof(int));
     char fileAd[273];
@@ -67,6 +69,24 @@ int main() {
     }
     fclose(f);
 
+    f = fopen("imBG.txt", "r");
+    u=0;
+    while(1) {
+        imBG[u] = fgetc(f);
+        if (imBG[u] == '\n') {
+            imBG[u] = '\0';
+		    break;
+        }
+        else if (feof(f)) {
+            imBG[u] = '\0';
+            break;
+        }
+        u++;
+    }
+    fclose(f);
+
+    //printf("%s\n", imBG);
+
     for(int i=0; i<imSize; i++) {
         int *randomHV = (int*)malloc(D * sizeof(int));
         genRandomHV(D, randomHV);
@@ -77,7 +97,7 @@ int main() {
     }
 
     for(int l=0; l<length; l++) {
-        char *buffer = (char*)malloc(2000000 * sizeof(char));
+        char *buffer = (char*)malloc(2500000 * sizeof(char));
         int *sumHV = (int*)malloc(D * sizeof(int));
         char fileAddress[24];
 
@@ -98,7 +118,7 @@ int main() {
         }
         fclose(f);
         printf("Loading %s\n", fileAddress);
-        computeSumHV(N, D, sumHV, buffer, count, itemMemory, iMHV, byteSize);
+       computeSumHV(N, D, sumHV, buffer, count, itemMemory, iMHV, byteSize, imBG, bgSize);
 
         for(int i=0; i<D; i++) {
             *(langAM + l*D + i) = sumHV[i];
@@ -147,7 +167,7 @@ int main() {
         //cleanText(buff, c, itemMemory, imSize, byteSize);
         printf("Loaded %s\n", fileAd);
 
-        computeSumHV(N, D, testSumHV, buff, c, itemMemory, iMHV, byteSize);
+        computeSumHV(N, D, testSumHV, buff, c, itemMemory, iMHV, byteSize, imBG, bgSize);
         binarizeHV(testSumHV, D);
 
         for(int l=0; l<length; l++) {
@@ -167,10 +187,6 @@ int main() {
                 //sprintf(predicLang2, "%s", predicLang);
                 sprintf(predicLang, "%s", fileLabel[l]);
             }
-            /*else if (angle > angle2) {
-                angle2 = angle;
-                sprintf(predicLang2, "%s", fileLabel[l]);
-            }*/
             free(tmp);
         }
 
@@ -179,10 +195,10 @@ int main() {
         if (((sd->d_name)[0] == predicLang[0]) && ((sd->d_name)[1] == predicLang[1])) {
             correct++;
         }
-        /*else if (((sd->d_name)[0] == predicLang2[0]) && ((sd->d_name)[1] == predicLang2[1])) { 
+        else { 
             printf("%s\n", predicLang);
-            correct2++;
-        }*/
+            //correct2++;
+        }
 
         total++;
         free(predicLang);
@@ -202,6 +218,7 @@ int main() {
     free(alpha);
     free(itemMemory);
     free(langAM);
+    free(imBG);
     return 0;
 }
 void cleanText(char *buffer, int size, char *itemMemory, int imSize, int byteSize) {
@@ -295,7 +312,7 @@ void binarizeHV(int *v, int szofv) {
 			v[i] = -1;
 	}
 }
-void computeSumHV(int N, int D, int *sumHV, char *buffer, int count, char *itemMemory, int *iMHV, int byteSize) {
+void computeSumHV(int N, int D, int *sumHV, char *buffer, int count, char *itemMemory, int *iMHV, int byteSize, char *imBG, int bgSize) {
     int *block = (int*)malloc(N * D * sizeof(int));
      for(int i=0; i<D; i++) {
         sumHV[i] = 0;
@@ -309,7 +326,7 @@ void computeSumHV(int N, int D, int *sumHV, char *buffer, int count, char *itemM
 
     for(int i=0; i<count; i++) {
         circShift(N, D, block);
-        i = lookupItemMemory(D, block, buffer, i, itemMemory, iMHV, byteSize);
+        i = lookupItemMemory(D, block, buffer, i, itemMemory, iMHV, byteSize, imBG, bgSize);
 
         if (i >= N) {
             int *nGrams;
@@ -366,7 +383,7 @@ void circShift(int n, int d, int *arr) {
 
 	free(arr1);
 }
-int lookupItemMemory(int D, int *block, char *buffer, int index, char *itemMemory, int *iMHV, int byteSize) {
+int lookupItemMemory(int D, int *block, char *buffer, int index, char *itemMemory, int *iMHV, int byteSize, char *imBG, int bgSize) {
     int y;
     int imIndex=27;
     char key[2];
@@ -388,13 +405,22 @@ int lookupItemMemory(int D, int *block, char *buffer, int index, char *itemMemor
         key[1] = buffer[index+1];
         
         for(int i=27; i<byteSize; i=i+2) {
-            //printf("%c%c", itemMemory[i], itemMemory[i+1]);/*
             if((key[0] == itemMemory[i]) && (key[1] == itemMemory[i+1])) {
-                //buffer[i]
-                //printf("%c%c ", key[0], key[1]);
                 buffer[index] = key[0];
                 buffer[index+1] = key[1];
-                //printf("%c%c\t", buffer[index], buffer[index+1]);
+                
+                for(int j=0; j<D; j++) {
+                    *(block + j) = *(iMHV + imIndex*D + j);
+                }
+                index++;
+                break;
+            }
+            imIndex++;
+        }
+        for(int i=0; i<bgSize; i=i+2) {
+            if((key[0] == imBG[i]) && (key[1] == imBG[i+1])) {
+                buffer[index] = key[0];
+                buffer[index+1] = key[1];
                 
                 for(int j=0; j<D; j++) {
                     *(block + j) = *(iMHV + imIndex*D + j);
