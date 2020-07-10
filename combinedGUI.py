@@ -10,8 +10,8 @@ THIS_FOLDER = os.path.dirname(os.path.abspath('main.so'))
 my_file = os.path.join(THIS_FOLDER, 'main.so')
 print(my_file)
 
-so_file = "main.so"    #CONNECTION TO C CODE
-main = ctypes.CDLL(so_file)
+so_file = ""    #CONNECTION TO C CODE
+main = ctypes.CDLL(my_file)
 
 root = Tk()
 root.title("Language Recognition")
@@ -36,7 +36,7 @@ def button_run():
     msg.grid(row=1, column=0)
 
 def button_write():
-    new_path = "/home/pi/Desktop/pyFile.txt"
+    new_path = os.path.join(THIS_FOLDER, 'pyfile.txt')
     entryFile = open(new_path, "w")
     entryFile.write(e.get())
     entryFile.close()
@@ -58,7 +58,7 @@ def button_train():
     valuestr = str(N) + " " + str(D) + "\n"
     os.write(values, bytes(valuestr, "utf-8"));
     os.close(values)
-    s = subprocess.check_output("gcc -O5 main.c -o main -lm;./main", stdin = data, shell=True)
+    s = subprocess.check_output("gcc -O5 c/main.c -o main -lm;./main", stdin = data, shell=True)
     print(s.decode("utf-8"))
     
     if N==5:
@@ -111,6 +111,13 @@ progress_train.grid(row=1, column=4, padx=15, pady=15)
 Radiobutton(root, text="Low Function", variable=r, value=1, command=lambda: mode(r.get())).grid(row=0, column=3)
 Radiobutton(root, text="Medium Function", variable=r, value=2, command=lambda: mode(r.get())).grid(row=1, column=3)
 Radiobutton(root, text="High Function", variable=r, value=3, command=lambda: mode(r.get())).grid(row=2, column=3)
+
+#dropdown menu
+options = ['C','Python']
+var = StringVar(root)
+var.set(options[0])
+optmenu = OptionMenu(root, var, *options).grid(row=3, column=4)
+
 
 writeFileB = Button(root, text="Detect Language", command = button_write, padx=50, pady=10)
 writeFileB.grid(row=1, column=0)
