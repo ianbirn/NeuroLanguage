@@ -32,6 +32,8 @@ int personalTest(int N, int D, int *langAM, int *imhv, char itemMemory[], int im
 double program(int N, int D);	//runs the entire program with all the testing files, returns percentage
 int sentence(int N, int D);	//tests the document linked with the python code
 int training(int N, int D);	//runs the train function
+double percentage(int N, int D, int *langAM, int *imhv, char itemMemory[], int imSize, char fileAddress[]);
+double sentencePercentage(int N, int D);
 
 int main() {
    
@@ -40,10 +42,10 @@ int main() {
     
     scanf("%d %d", &N, &D);
     
-   // printf("My guess is: %d\n", sentence(N, D));
+    //printf("My guess is: %d %.2f%% match\n", sentence(N, D), sentencePercentage(N, D));
     printf("%d\n", training(N, D));
     
-    printf("N: %d\nD: %d\n", N, D);
+   // printf("N: %d\nD: %d\n", N, D);
     
     return 0;
 } 
@@ -321,7 +323,7 @@ double test(int N, int D, int *langAM, int *imhv, char itemMemory[], int imSize)
 	double total = 0.0;
 	double accuracy = 0.0;
 	
-	dir = opendir("/home/pi/Downloads/tempTesting_texts");
+	dir = opendir("/home/pi/Downloads/testing_texts");
 	
     if (dir == NULL) {
         printf("Failed: Directory could not be openned.\n");
@@ -338,7 +340,7 @@ double test(int N, int D, int *langAM, int *imhv, char itemMemory[], int imSize)
             continue;
 		
 		
-		snprintf(fileAddress, 300, "%s%s", "/home/pi/Downloads/tempTesting_texts/", sd->d_name);
+		snprintf(fileAddress, 300, "%s%s", "/home/pi/Downloads/testing_texts/", sd->d_name);
 		fileID = fopen(fileAddress, "r"); 
 		
         if (fileID == NULL) {
@@ -368,6 +370,7 @@ double test(int N, int D, int *langAM, int *imhv, char itemMemory[], int imSize)
 			}	
 
 			angle = cosAngle(testSumHV, tmp, D);
+			
 			
 			if (angle > maxAngle) {
 				maxAngle = angle;
@@ -636,14 +639,16 @@ int personalTest(int N, int D, int *langAM, int *imhv, char itemMemory[], int im
 		}	
 
 		angle = cosAngle(testSumHV, tmp, D);
+		//printf("%c%c%c: %f\n", fileLabel[l][0], fileLabel[l][1], fileLabel[l][2], angle); //angles
 		
 		if (angle > maxAngle) {
 			maxAngle = angle;
 			predicLang = l;
 		}
 	}
+	//double percentage = ((1+maxAngle)/2)*100;
 		
-	printf("Guess: %d \n", predicLang);
+	//printf("Guess: %d %.2f%% match\n", predicLang, percentage);
 
 	free(text);
 	free(tmp);
@@ -736,8 +741,8 @@ int sentence(int N, int D) {
     free(langAM);
     return answer;
 }
-
 int training(int N, int D) {
+	
 	srand(time(0));
     struct timeval start, end; 
     double trainTime;
@@ -762,4 +767,118 @@ int training(int N, int D) {
 	free(langAM);
     
     return 1;
+}
+double percentage(int N, int D, int *langAM, int *imhv, char itemMemory[], int imSize, char fileAddress[]) {
+
+	char alpha[] = "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ\n";
+	char temp;
+	char cleanAddress[] = "/home/pi/Desktop/clean.txt";
+	
+	char fileLabel[][12] = {"afrikaans ", "bulgarian ", "czech ", "danish ", "dutch ", "german ", "english ", "estonian ", "finnish ", "french ", "greek ", "hungarian ", "italian ", "latvian ", "lithuanian ", "polish ", "portuguese ", "romanian ", "slovak ", "slovenian ", "spanish ", "swedish "};
+	int length = (sizeof fileLabel)/(sizeof fileLabel[0]);
+	
+	int *testSumHV;
+	testSumHV = (int*)malloc(D * sizeof(int));
+	
+	int *tmp;
+	tmp = (int*)malloc(D * sizeof(int));
+	
+	char *text;
+	text = (char*)malloc(300000 * sizeof(char));
+	
+	double angle = 0.0;
+	double maxAngle = -1.0;
+	
+	FILE *fileID = fopen(fileAddress, "r");
+	
+	if (fileID == NULL) {
+		printf("Failed: Can't open %s\n", fileAddress);
+		exit(1);
+	}
+
+	printf("Loaded: %s\n", fileAddress);
+        int counter = 0;
+	while(1) {
+		temp = fgetc(fileID);
+		if(feof(fileID)) {
+			text[counter] = '\0';
+			break;
+		}
+		else {
+			for(int i=0; i<54; i++) {
+				if(alpha[i] == temp) {
+					comb(&temp);
+					text[counter] = temp;
+					counter++;
+				}
+			}
+		}
+	}
+	printf("Finished creating testing file: %s\n", cleanAddress);
+	fclose(fileID);
+	FILE *wfile = fopen(cleanAddress, "w");
+	if (wfile == NULL) {
+		printf("Failed: %s could not be openned.\n", cleanAddress);
+		exit(1);
+	}	
+	fprintf(wfile, "%s", text);
+	
+	computeSumHV (N, D, testSumHV, counter, text, imhv, itemMemory, imSize);
+	binarizeHV(testSumHV, D);
+	
+	for(int l=0; l<length; l++) { //loop to go through the languages	
+		for(int i=0; i<D; i++) {
+			tmp[i] = *(langAM + l*D + i);
+		}	
+
+		angle = cosAngle(testSumHV, tmp, D);
+		//printf("%c%c%c: %f\n", fileLabel[l][0], fileLabel[l][1], fileLabel[l][2], angle); //angles
+		
+		if (angle > maxAngle) {
+			maxAngle = angle;
+		}
+	}
+	double percentage = ((1+maxAngle)/2)*100;
+		
+	//printf("Guess: %d %.2f%% match\n", predicLang, percentage);
+
+	free(text);
+	free(tmp);
+	free(testSumHV);
+	
+	return percentage;
+
+}
+double sentencePercentage(int N, int D) {
+	
+	srand(time(0));
+
+    double answer;
+    int errorhandler;
+    
+	char fileAddress[] = "/home/pi/Desktop/pyFile.txt"; //LINK TO PYTHON FILE
+
+    char itemMemory[27] = "abcdefghijklmnopqrstuvwxyz ";     
+    int imSize = sizeof(itemMemory);
+    char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
+    int length =  (sizeof langLabels)/(sizeof langLabels[0]); //size of langLabels
+
+    int *imhv = (int*)malloc(imSize * D * sizeof(int));
+    int *langAM = (int*)malloc(length * D * sizeof(int));
+                                              //comment out to not time
+	errorhandler = storeLangAMwithCheck(N, D, langAM, length, langLabels, imSize, itemMemory, imhv);
+	if(errorhandler == -1) {
+		answer = -1;
+	}
+	else if(errorhandler == -2) {
+		answer = -2;
+	}
+	else {
+		answer = percentage(N, D, langAM, imhv, itemMemory, imSize, fileAddress);
+		//answer = test(N, D, langAM, imhv, itemMemory, imSize);
+	}
+
+    free(imhv);
+    free(langAM);
+    return answer;
 }
