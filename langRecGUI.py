@@ -6,7 +6,7 @@ import os
 from threading import Thread
 from decimal import Decimal
 
-so_file = "/home/pi/Desktop/internship/main.so"    #CONNECTION TO C CODE
+so_file = "/home/benlucas/Desktop/internship/main.so"    #CONNECTION TO C CODE
 main = ctypes.CDLL(so_file)
 
 root = Tk()
@@ -36,7 +36,7 @@ r.set("2")
 count = 1
 
 def button_detect():
-    new_path = "/home/pi/Desktop/pyFile.txt"
+    new_path = "/home/benlucas/Desktop/internship/pyFile.txt"
     entryFile = open(new_path, "w")
     if len(e.get()) == 0:
         ans.config(text="Please enter something first", fg="black")
@@ -47,17 +47,17 @@ def button_detect():
     percentage = main.sentencePercentage(N, D)
     percentage = round(percentage, 2)
     if langNum == -1:
-        ans.config(text="Please train that setting first!")
+        ans.config(text="Please train that setting first!", fg="black")
     elif langNum == -2:
-        ans.config(text="Please train a setting first!")
+        ans.config(text="Please train a setting first!", fg="black")
     else:
         lang = list1[langNum]
         if percentage < 60:
-            ans.config(text="My guess: " + lang + " " + str(percentage) + "% match", fg="red")
+            ans.config(text="My guess: " + lang + " " + str(percentage) + "% match", fg="red", font='bold')
         elif percentage < 80:
-            ans.config(text="My guess: " + lang + " " + str(percentage) + "% match", fg="yellow")
+            ans.config(text="My guess: " + lang + " " + str(percentage) + "% match", fg="dark orange", font='bold')
         elif percentage <= 100:
-            ans.config(text="My guess: " + lang + " " + str(percentage) + "% match", fg="green")
+            ans.config(text="My guess: " + lang + " " + str(percentage) + "% match", fg="green", font='bold')
         global survey
         survey = Label(root, text="Was I correct?")
         survey.grid(row=3, column=0, padx=15, pady=15)
@@ -188,13 +188,13 @@ trainB = Button(root, text="Train Me!", command = real_training)
 trainB.grid(row=0, column=4)
 trainB.config(font=14)
 
-ans = Label(root, text="My guess: ")
+ans = Label(root, text="My guess: ", font='bold')
 ans.grid(row=2, column=0, padx=10, pady=10)
 
 done = Label(root, text=" ")
 done.grid(row=2, column=4)
 e = Entry(root, borderwidth=5, width=40)
-e.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
+e.grid(row=0, column=0, columnspan=3, padx=25, pady=10)
 
 #BUTTON MATRIX
 buttons = [writeFileB, clearB, trainB]
