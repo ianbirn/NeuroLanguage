@@ -23,7 +23,7 @@ main.sentence.restype = ctypes.c_int
 main.sentence.argtypes = [ctypes.c_int, ctypes.c_int]
 
 main.sentencePercentage.restype = ctypes.c_double
-main.sentencePercentage.argtype = [ctypes.c_int, ctypes.c_int]
+main.sentencePercentage.argtypes = [ctypes.c_int, ctypes.c_int]
 
 N = 3
 D = 5000
@@ -39,7 +39,7 @@ def button_detect():
     new_path = "/home/pi/Desktop/pyFile.txt"
     entryFile = open(new_path, "w")
     if len(e.get()) == 0:
-        ans.config(text="Please enter something first")
+        ans.config(text="Please enter something first", fg="black")
         return
     entryFile.write(e.get())
     entryFile.close()
@@ -86,10 +86,6 @@ def run_threading2():
         
 def real_detect():
     Thread(target= run_threading2).start()
-    yesButton.destroy()
-    noButton.destroy()
-    surveyReaction.destroy()
-    survey.destroy()
 
 def button_clear():
     e.delete(0, END)
