@@ -56,7 +56,8 @@ else:
     prg = Tk()
     prg.title("Language Recognition")
 
-    so_file = "/home/pi/Desktop/internship/main.so"    #CONNECTION TO C CODE
+    dirstring = os.path.abspath(os.getcwd())
+    so_file = dirstring + "/main.so"          #CONNECTION TO C CODE
     main = ctypes.CDLL(so_file)
 
     #import subprocess
