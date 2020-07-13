@@ -340,7 +340,7 @@ double test(int N, int D, int *langAM, int *imhv, char itemMemory[], int imSize)
             continue;
 		
 		
-		snprintf(fileAddress, 300, "%s%s", "/home/pi/Downloads/testing_texts/", sd->d_name);
+		snprintf(fileAddress, 300, "%s%s", "testing_texts/", sd->d_name);
 		fileID = fopen(fileAddress, "r"); 
 		
         if (fileID == NULL) {
@@ -463,7 +463,7 @@ void buildLangHV(int N, int D, int length, char langLabels[][4], char cachedND[]
 			exit(1);
 		}
 
-		snprintf(fileAddress, 110, "%s%s%s", "/home/pi/Downloads/training_texts/", langLabels[i], ".txt");
+		snprintf(fileAddress, 110, "%s%s%s", "training_texts/", langLabels[i], ".txt");
 
 		langf = fopen(fileAddress, "r");
 
@@ -576,7 +576,7 @@ int personalTest(int N, int D, int *langAM, int *imhv, char itemMemory[], int im
 
 	char alpha[] = "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ\n";
 	char temp;
-	char cleanAddress[] = "/home/pi/Desktop/clean.txt";
+	char cleanAddress[] = "clean.txt";
 	
 	int *testSumHV;
 	testSumHV = (int*)malloc(D * sizeof(int));
@@ -703,7 +703,7 @@ int sentence(int N, int D) {
     int answer;
     int errorhandler;
     
-	char fileAddress[] = "/home/pi/Desktop/pyFile.txt"; //LINK TO PYTHON FILE
+	char fileAddress[] = "pyFile.txt"; //LINK TO PYTHON FILE
 
     char itemMemory[27] = "abcdefghijklmnopqrstuvwxyz ";     
     int imSize = sizeof(itemMemory);
@@ -772,7 +772,7 @@ double percentage(int N, int D, int *langAM, int *imhv, char itemMemory[], int i
 
 	char alpha[] = "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ\n";
 	char temp;
-	char cleanAddress[] = "/home/pi/Desktop/clean.txt";
+	char cleanAddress[] = "clean.txt";
 	
 	char fileLabel[][12] = {"afrikaans ", "bulgarian ", "czech ", "danish ", "dutch ", "german ", "english ", "estonian ", "finnish ", "french ", "greek ", "hungarian ", "italian ", "latvian ", "lithuanian ", "polish ", "portuguese ", "romanian ", "slovak ", "slovenian ", "spanish ", "swedish "};
 	int length = (sizeof fileLabel)/(sizeof fileLabel[0]);
@@ -856,7 +856,7 @@ double sentencePercentage(int N, int D) {
     double answer;
     int errorhandler;
     
-	char fileAddress[] = "/home/pi/Desktop/pyFile.txt"; //LINK TO PYTHON FILE
+	char fileAddress[] = "pyFile.txt"; //LINK TO PYTHON FILE
 
     char itemMemory[27] = "abcdefghijklmnopqrstuvwxyz ";     
     int imSize = sizeof(itemMemory);

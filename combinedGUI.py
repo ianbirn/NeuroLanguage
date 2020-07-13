@@ -5,6 +5,7 @@ import subprocess
 import os
 import time
 from threading import Thread
+from pythonFunctions import *
 
 THIS_FOLDER = os.path.dirname(os.path.abspath('main.so'))
 my_file = os.path.join(THIS_FOLDER, 'main.so')
@@ -26,6 +27,7 @@ main.program.argtypes = [ctypes.c_int, ctypes.c_int]
 main.sentence.restype = ctypes.c_int
 main.sentence.argtypes = [ctypes.c_int, ctypes.c_int]
 
+langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
 
 N = 3
 D = 5000
@@ -36,24 +38,50 @@ def button_run():
     msg.grid(row=1, column=0)
 
 def button_write():
+    iM = {}
+    langAM = {}
     new_path = os.path.join(THIS_FOLDER, 'pyfile.txt')
     entryFile = open(new_path, "w")
     entryFile.write(e.get())
     entryFile.close()
-    langNum = main.sentence(N, D)
-    if langNum == -1:
-        ans.config(text="Please train that setting first!")
-    elif langNum == -2:
-        ans.config(text="Please train a setting first!")
-    else:
-        list1 = ["afrikaans", "bulgarian", "czech", "danish", "dutch", "german", "english", "estonian", "finnish", "french", "greek", "hungarian", "italian", "latvian", "lithuanian", "polish", "portuguese", "romanian", "slovak", "slovenian", "spanish", "swedish", "error"]
-        lang = list1[langNum]
-        ans.config(text="My guess: " + lang)
+    if var.get() == 'Python':
+        path = 'python/cachedTraining/' + str(D) + '_' + str(N)
+        if not os.path.isdir(path):
+            print('folder does not exist!')
+            exit()
+	
+        #read in the training files
+        for arr, name in readTrainingFiles(path + '/'):
+            if (name[0:2] == 'im'):
+                newKey = os.path.splitext(name)[0][3:]
+                iM[newKey] = arr
+            if (name[0:2] == 'la'):
+                newKey = os.path.splitext(name)[0][3:]
+                langAM[newKey] = arr
+	
+        print(iM)
+        print(langAM)
+        #testing the function
+        
+        lang = testHV(iM, langAM, N, D, langLabels, e.get())
+        print(lang)
+        ans.config(text='My guess: ' + lang[0])
+    else:	
+        if langNum == -1:
+            ans.config(text="Please train that setting first!")
+        elif langNum == -2:
+            ans.config(text="Please train a setting first!")
+        else:
+            list1 = ["afrikaans", "bulgarian", "czech", "danish", "dutch", "german", "english", "estonian", "finnish", "french", "greek", "hungarian", "italian", "latvian", "lithuanian", "polish", "portuguese", "romanian", "slovak", "slovenian", "spanish", "swedish", "error"]
+            lang = list1[langNum]
+            ans.config(text="My guess: " + lang)
     
 def button_clear():
     e.delete(0, END)
     
 def button_train():
+    if var.get() == 'Python':
+        ##### work here
     data, values = os.pipe()
     valuestr = str(N) + " " + str(D) + "\n"
     os.write(values, bytes(valuestr, "utf-8"));

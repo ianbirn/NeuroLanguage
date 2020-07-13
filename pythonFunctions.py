@@ -105,56 +105,23 @@ def cosAngle(u, v):
 
 #read testing files and calculate the similarities between them and the 
 #language hypervectors and output the accuracy
-def testHV(iM, langAM, N, D, langLabels):
-	langMap = {}
-	langMap ['af'] = 'afr'
-	langMap ['bg'] = 'bul'
-	langMap ['cs'] = 'ces'
-	langMap ['da'] = 'dan'
-	langMap ['nl'] = 'nld'
-	langMap ['de'] = 'deu'
-	langMap ['en'] = 'eng'
-	langMap ['et'] = 'est'
-	langMap ['fi'] = 'fin'
-	langMap ['fr'] = 'fra'
-	langMap ['el'] = 'ell'
-	langMap ['hu'] = 'hun'
-	langMap ['it'] = 'ita'
-	langMap ['lv'] = 'lav'
-	langMap ['lt'] = 'lit'
-	langMap ['pl'] = 'pol'
-	langMap ['pt'] = 'por'
-	langMap ['ro'] = 'ron'
-	langMap ['sk'] = 'slk'
-	langMap ['sl'] = 'slv'
-	langMap ['es'] = 'spa'
-	langMap ['sv'] = 'swe'
-	total = 0
-	correct = 0
-	count=0
-	for text, name in readTestFiles('../testing_texts/'):
-		print('reading ' + str(name))
-		actualLabel = name[0:2]
+def testHV(iM, langAM, N, D, langLabels, s):
+	accuracy={}
+	
+	iMn, textHV = computeSumHV(s, iM, N, D)
+	textHV = binarizeHV(textHV)
+	
+	if np.not_equal(iM, iMn):
+		print('------NEW ITEM IN TEST SENTENCE-----')
+	else:
+		maxAngle = -1
+		for label in langLabels:
+			angle = cosAngle(langAM[label], textHV[0,:])
+			accuracy[label] = angle
 		
-		iMn, textHV = computeSumHV(text, iM, N, D)
-		textHV = binarizeHV(textHV)
-
-		if np.not_equal(iM, iMn):
-			print("NEW UNSEEN ITEM IN TEST FILE")
-			break
-		else:
-			maxAngle = -1
-			for label in langLabels:
-				angle = cosAngle(langAM[label], textHV[0,:])
-				if angle > maxAngle:
-					maxAngle = angle
-					predicLang = label
-			if predicLang == langMap[actualLabel]:
-				correct+=1
-			else:
-				print(str(langMap[actualLabel] + '--->' + predicLang))
-			total+=1
-		
-		accuracy = correct / total
-		
-	return accuracy
+	
+	## sort the list
+	sortAccuracy = sorted(accuracy.items(), key=lambda kv:(kv[1], kv[0]), reverse=True)
+	
+	return sortAccuracy[0]
+	
