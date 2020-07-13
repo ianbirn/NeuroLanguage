@@ -44,6 +44,7 @@ int main() {
     
     //printf("My guess is: %d %.2f%% match\n", sentence(N, D), sentencePercentage(N, D));
     printf("%d\n", training(N, D));
+
     
    // printf("N: %d\nD: %d\n", N, D);
     
@@ -323,7 +324,7 @@ double test(int N, int D, int *langAM, int *imhv, char itemMemory[], int imSize)
 	double total = 0.0;
 	double accuracy = 0.0;
 	
-	dir = opendir("/home/pi/Downloads/testing_texts");
+	dir = opendir("testing_texts");
 	
     if (dir == NULL) {
         printf("Failed: Directory could not be openned.\n");
