@@ -33,19 +33,22 @@ N = 3
 D = 5000
 langNum = 22
 
+iM = {}
+langAM = {}
+
 def button_run():
     msg = Label(root, text= str(main.program(N, D)) + "%")
     msg.grid(row=1, column=0)
 
 def button_write():
-    iM = {}
-    langAM = {}
     new_path = os.path.join(THIS_FOLDER, 'pyfile.txt')
     entryFile = open(new_path, "w")
     entryFile.write(e.get())
     entryFile.close()
+    iM={}
+    langAM={}
     if var.get() == 'Python':
-        path = 'python/cachedTraining/' + str(D) + '_' + str(N)
+        path = 'cachedTraining/' + str(D) + '_' + str(N)
         if not os.path.isdir(path):
             print('folder does not exist!')
             exit()
@@ -59,11 +62,11 @@ def button_write():
                 newKey = os.path.splitext(name)[0][3:]
                 langAM[newKey] = arr
 	
-        print(iM)
-        print(langAM)
+        #print(iM)
+        #print(langAM)
         #testing the function
         
-        lang = testHV(iM, langAM, N, D, langLabels, e.get())
+        lang = testHV(iM, langAM, N, D, langLabels, str(e.get()))
         print(lang)
         ans.config(text='My guess: ' + lang[0])
     else:	
@@ -80,14 +83,33 @@ def button_clear():
     e.delete(0, END)
     
 def button_train():
+    iM={}
+    langAM={}
     if var.get() == 'Python':
-        ##### work here
-    data, values = os.pipe()
-    valuestr = str(N) + " " + str(D) + "\n"
-    os.write(values, bytes(valuestr, "utf-8"));
-    os.close(values)
-    s = subprocess.check_output("gcc -O5 c/main.c -o main -lm;./main", stdin = data, shell=True)
-    print(s.decode("utf-8"))
+	    iM, langAM = buildLanguageHV(iM, langAM, langLabels, N, D)
+	
+		#check if folder exists, create or clear it
+	    path = 'cachedTraining/' + str(D) + '_' + str(N)
+	    if not os.path.isdir(path):
+		    os.mkdir(path)
+	
+		#write itemMemory
+	    for key, value in iM.items():
+		    filename = 'im_' + key + '.csv'
+		    with open(path + '/' + filename, 'w') as thefile:
+			    np.savetxt(thefile, value, delimiter=',')
+
+	    for key, value in langAM.items():
+		    filename = 'la_' + key + '.csv'
+		    with open(path + '/' + filename, 'w') as thefile:
+			    np.savetxt(thefile, value, delimiter=',')
+    else: 
+	    data, values = os.pipe()
+	    valuestr = str(N) + " " + str(D) + "\n"
+	    os.write(values, bytes(valuestr, "utf-8"));
+	    os.close(values)
+	    s = subprocess.check_output("gcc -O5 c/main.c -o main -lm;./main", stdin = data, shell=True)
+	    print(s.decode("utf-8"))
     
     if N==5:
         done.config(text="Done training low setting!")

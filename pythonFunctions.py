@@ -7,7 +7,7 @@ import time
 def readLabels(langLabels): 
 	i = 0
 	while i < langLabels.size:
-		address = '../training_texts/' + langLabels[i] + '.txt'
+		address = 'training_texts/' + langLabels[i] + '.txt'
 		buff = []
 		for row in open(address, 'r'):
 			buff.append(row)
@@ -103,6 +103,18 @@ def cosAngle(u, v):
 	cos = np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
 	return cos
 
+
+def buildLanguageHV(iM, langHV, langLabels, N, D):
+	langAM={}
+	for data, i in readLabels(langLabels):
+		iM, langHV = computeSumHV(data, iM, N, D)
+		langAM[langLabels[i]] = langHV
+		print('file read')
+		
+	print(iM)
+	print(langAM)
+	return iM, langAM
+
 #read testing files and calculate the similarities between them and the 
 #language hypervectors and output the accuracy
 def testHV(iM, langAM, N, D, langLabels, s):
@@ -122,6 +134,6 @@ def testHV(iM, langAM, N, D, langLabels, s):
 	
 	## sort the list
 	sortAccuracy = sorted(accuracy.items(), key=lambda kv:(kv[1], kv[0]), reverse=True)
-	
+	print(sortAccuracy)
 	return sortAccuracy[0]
 	
