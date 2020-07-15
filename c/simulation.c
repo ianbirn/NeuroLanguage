@@ -1,143 +1,218 @@
-#include <sys/stat.h> 
-#include <sys/types.h> 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <math.h>
+#include <sys/types.h>
 #include <dirent.h>
 #include <unistd.h>
-#include <string.h>
-#include <math.h>
-#include <errno.h>
 #include <time.h>
-#include <sys/time.h>
-void creatCache();
-void createND(int N, int D, char cachedND[]);
-void storeLangAM(int N, int D, int *langAM, int length, char langLabels[][4]);
-void createIMHV(int D, int imSize, char itemMemory[], char cachedND[], int *imhv);
-void perm(int D, int *arr);
-void genRandomHV(int D, int *randomHV);
-void loadiM(int D, int imSize, char cachedND[], char itemMemory[]);
+#include <sys/stat.h> 
+
+
+void perm(int D, int arr[]); //permutates an array
+void genRandomHV(int D, int randomHV[]); //generates random hypervector
+void createItemMemoryHV(int D, int iMHV[][D], int size); //creates hypervectors for every single character in itemMemory
+void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]); //loads and computes the training 
+void computeSumHV(int N, int D, int *sumHV, int count, char *buffer, int iMHV[][D], char itemMemory[]); //performs the encoding on a text files
+void circShift(int n, int d, int *arr);
+void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int *block);
+double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]);
+void binarizeHV(int *v, int szofv);
 double norm(int *a, int n);
 double dotProduct(int *a, int *b, int n);
 double cosAngle(int *a, int *b, int n);
-void binarizeHV(int *v, int szofv);
-void lookupItemMemory(int D, int *imhv, char itemMemory[], char key, int *block, int imSize);
-void circShift(int n, int d, int *arr);
-void computeSumHV(int N, int D, int *sumHV, int count, char *buffer, int *imhv, char itemMemory[], int imSize);
-void buildLangHV(int N, int D, int length, char langLabels[][4], char cachedND[], int imSize, char itemMemory[], int *imhv);
-double test(int N, int D, int *langAM, int *imhv, char itemMemory[], int imSize);
-void train(int N, int D, char itemMemory[], int imSize, int *imhv, char langLabels[][4], int length);
-void program(int N, int D);
+void writeLines(int length, char langLabels[][4], int lineMax);
 
 int main() {
-	
 	int N = 4;
-	int D = 1000;
+	int D = 10000;
 
-	program(N, D);
+	srand(time(0));
 	
+	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
+	int length = (sizeof langLabels)/(sizeof langLabels[0]);
+	char itemMemory[27] = "abcdefghijklmnopqrstuvwxyz ";
+	int langAM[length][D];
+	double accuracy;
+	int iMHV[27][D];
+
+
+	DIR *simDir;
+    simDir = opendir("training_textsSIM");
+
+  	if(simDir) {
+	    printf("Found dir training_textsSIM\n");
+    }
+    else {
+	mkdir("training_textsSIM", 0777);
+	}
+
+	for(int lineMax=1000; lineMax<10001; lineMax = lineMax+1000) {
+		writeLines(length, langLabels, lineMax);
+		createItemMemoryHV(D, iMHV, 27);
+		buildLangHV(N, D, langAM, iMHV, itemMemory);
+		//printf("Finished training of %d language files\n", length);
+		accuracy = test(N, D, langAM, iMHV, itemMemory);
+		printf("Accuracy @ %d lines = %f%%\n", lineMax, accuracy);
+	}	
+	/*
+	
+	createItemMemoryHV(D, iMHV, 27);
+	buildLangHV(N, D, langAM, iMHV, itemMemory);
+	accuracy = test(N, D, langAM, iMHV, itemMemory);
+	printf("Accuracy = %f%%\n", accuracy);
+	*/
+	   
 	return 0;
 }
-void createCache() {
-    mkdir("SIMcachedTraining/", 0777);
-}
-void createND(int N, int D, char cachedND[]) {
-    mkdir(cachedND, 0777);
-}
-void storeLangAM(int N, int D, int *langAM, int length, char langLabels[][4]) {
-	char fileAddress[37];
-	FILE *laf;
 
-	char cachedND[27];
-	snprintf(cachedND, 27, "%s%d%s%d%s", "SIMcachedTraining/", D, "_", N, "/");        //Directory information for cache
+void writeLines(int length, char langLabels[][4], int lineMax) {
+	
+	FILE *fp;
+    FILE *langf;
+    char fileAddress[150];
+    char fileAddresslang[150];
+	
+	 for(int i=0; i<length; i++) {
 
-	for(int i=0; i<length; i++) {
-		snprintf(fileAddress, 37, "%s%s%c%c%c%s", cachedND, "la_", langLabels[i][0], langLabels[i][1], langLabels[i][2], ".txt");
-		laf = fopen(fileAddress, "r");
-		if (laf == NULL) {
-			fclose(laf);
-			break;
+		int count = 0;
+  		int lines = 0;
+
+		char *buff;
+		buff = (char*)malloc((2000000) * sizeof(char));
+		if(buff == NULL) {
+			printf("not enough memory\n");
+			exit(1);
 		}
-		for(int j=0; j<D; j++){
-			fscanf(laf, "%i", &(*(langAM + i*D + j)));
+		
+		sprintf(fileAddress, "%s%s%s", "/home/benlucas/Desktop/sim/training_textsSIM/", langLabels[i], ".txt");
+		fp = fopen(fileAddress, "w+");
+		if(fp == NULL) {
+			printf("Error opening: %s\n", fileAddress);
 		}
-		fclose(laf);
-	}
-}
-void createIMHV(int D, int imSize, char itemMemory[], char cachedND[], int *imhv) {
-    FILE *imf;
-    char imAddress[34];
-
-    for(int i=0; i<imSize; i++) {                                   //Loads the HVs from the character text files into an array (for speed purposes)
-        if (itemMemory[i] == ' ') {
-            snprintf(imAddress, 34, "%s%s", cachedND, "im__.txt");
-        }
-        else {
-            snprintf(imAddress, 34, "%s%s%c%s", cachedND, "im_", itemMemory[i], ".txt");
-        }
-
-        imf = fopen(imAddress, "r");
-        for(int j=0; j<D; j++) {
-            int num=0;
-            fscanf(imf, "%i", &num);
-            *(imhv + i*D + j) = num;
-        }
-        fclose(imf);
-    }
-}
-void perm(int D, int *arr) {	
-	//Initialize Array
-	for(int i=0; i<D; i++) {
-		arr[i] = i;
+		sprintf(fileAddresslang, "%s%s%s", "/home/benlucas/Desktop/internship/training_texts/", langLabels[i], ".txt");
+		langf = fopen(fileAddresslang, "r");
+		if(langf == NULL) {
+			printf("Error opening: %s\n", fileAddresslang);
+			exit(1);
+		}
+		
+		while(lines < lineMax) {
+			buff[count] = fgetc(langf);
+			if(buff[count] == '\n') {
+				lines++;
+			}
+			count++;	
+		}
+		buff[count] = '\0';
+		fprintf(fp, "%s", buff);
+		
+		fclose(fp);
+		fclose(langf);
+		free(buff);
 	}
 	
-	//Randomize the numbers of the array
-	int k, l;
-	for(int j=0; j<D; j++) {
-		k = rand() % (D-j) + j;
-		l = arr[k];
-		arr[k] = arr[j];
-		arr[j] = l; 
-	}
+	//printf("Finished writing the first %d lines to files\n", lineMax);
 }
-void genRandomHV(int D, int *randomHV) {
-	if (D % 2 != 0) {
-		printf("Dimension is odd\n");
-	}
-	else {
-		//Permute the Array
-		perm(D, randomHV);
-		
-		for(int i=0; i<D; i++) {
-			if (randomHV[i] <= D/2) {
-				randomHV[i] = 1;
-			}
-			else {
-				randomHV[i] = -1;
-			}
-		}
-	}
-}
-void loadiM(int D, int imSize, char cachedND[], char itemMemory[]) {
+
+double test(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
+	DIR *dir;
+	struct dirent *sd;
 	FILE *fileID;
-	for(int i=0; i<imSize; i++) {
-		char fiAd[34];
-		int *randomHV;
-		randomHV = (int*)malloc(D * sizeof(int));
-			
-		if (itemMemory[i] == ' ') {
-			snprintf(fiAd, 34, "%s%s", cachedND, "im__.txt");
+
+	int *testSumHV;
+	testSumHV = (int*)malloc(D * sizeof(int));
+	
+	int *tmp;
+	tmp = (int*)malloc(D * sizeof(int));
+	
+	char *buffer;
+	buffer = (char*)malloc(300000 * sizeof(char));
+	if(buffer == NULL) {
+		printf("Not enough memory for buffer\n");
+	}
+	
+	char fileLabel[][3] = {"af", "bg", "cs", "da", "nl", "de", "en", "et", "fi", "fr", "el", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
+	int length = (sizeof fileLabel)/(sizeof fileLabel[0]);
+	
+	double angle = 0.0;
+	char predicLang[3];
+	double correct=0.0;
+	double total = 0.0;
+	double accuracy = 0.0;
+	
+	dir = opendir("/home/benlucas/Desktop/sim/testing_texts");
+	
+    if (dir == NULL) {
+        printf("Failed: Directory could not be openned.\n");
+        exit(1);
+    }
+	
+	while((sd=readdir(dir)) != NULL) {
+		char fileAddress[300];
+		double maxAngle = -1.0;
+		
+        if (!strcmp (sd->d_name, "."))
+            continue;
+        if (!strcmp (sd->d_name, ".."))    
+            continue;
+		
+		
+		sprintf(fileAddress, "%s%s", "/home/benlucas/Desktop/sim/testing_texts/", sd->d_name);
+		fileID = fopen(fileAddress, "r"); 
+		
+        if (fileID == NULL) {
+            printf("Failed: %s could not be opened.\n", fileAddress);
+            break;
+        }
+
+        int count=0;
+		while(1) {
+			buffer[count] = fgetc(fileID);
+			if(feof(fileID)) {
+				break;
+			}
+			count++;
 		}
-		else {
-			snprintf(fiAd, 34, "%s%s%c%s", cachedND, "im_", itemMemory[i], ".txt");
-		}
-		fileID = fopen(fiAd, "w");
-		genRandomHV(D, randomHV);
-		for(int j=0; j<D; j++) {
-			fprintf(fileID, "%i ", randomHV[j]); 
-		}
+		buffer[count] = '\0';	//ending string, closing file
+
 		fclose(fileID);
-		free(randomHV);
-	}	
+		//printf("Loaded: %s\n", fileAddress);
+		
+		computeSumHV (N, D, testSumHV, count, buffer, iMHV, itemMemory);
+		binarizeHV(testSumHV, D);
+		
+		for(int l=0; l<length; l++) { //loop to go through the languages	
+			for(int i=0; i<D; i++) {
+				tmp[i] = langAM[l][i];
+			}	
+
+			angle = cosAngle(testSumHV, tmp, D);
+			//printf("%f ", angle);
+			
+			if (angle > maxAngle) {
+				maxAngle = angle;
+				snprintf(predicLang, 3, "%c%c", fileLabel[l][0], fileLabel[l][1]);
+			}
+		}
+		
+		//printf("%s ", predicLang);
+		
+		if ((predicLang[0] == (sd->d_name)[0]) && (predicLang[1] == (sd->d_name)[1])) {
+			correct++;
+		}
+		total++;
+		
+	}
+	closedir(dir);
+	free(buffer);
+	free(tmp);
+	free(testSumHV);
+	
+    accuracy = correct/total;
+    accuracy = accuracy * 100.0;
+	return accuracy;
 }
 double norm(int *a, int n) {
 	double sum=0.0;
@@ -159,6 +234,7 @@ double dotProduct(int *a, int *b, int n) {
 double cosAngle(int *a, int *b, int n) {
 	return dotProduct(a, b, n)/(norm(a, n)*norm(b, n));	
 }
+
 void binarizeHV(int *v, int szofv) {
 	int threshold = 0;
 	for( int i=0; i<szofv; i++) {
@@ -168,17 +244,156 @@ void binarizeHV(int *v, int szofv) {
 			v[i] = -1;
 	}
 }
-void lookupItemMemory(int D, int *imhv, char itemMemory[], char key, int *block, int imSize) {
-	for (int i=0; i<imSize; i++) {
-		if (itemMemory[i] == key) {
-				for(int j=0; j<D; j++) {
-                    int num = *(imhv + i*D + j);
-					*(block + j) = num;
-			}
-			break;
+
+void createItemMemoryHV(int D, int iMHV[][D], int size) {
+	for(int i=0; i<size; i++) {
+		int randomHV[D];
+		genRandomHV(D, randomHV);
+		for(int j=0; j<D; j++) {
+			iMHV[i][j] = randomHV[j];
 		}
 	}
+}
+void perm(int D, int arr[]) {	
+	//Initialize Array
+	for(int i=0; i<D; i++) {
+		arr[i] = i;
+	}
+	
+	//Randomize the numbers of the array
+	int k, l;
+	for(int j=0; j<D; j++) {
+		k = rand() % (D-j) + j;
+		l = arr[k];
+		arr[k] = arr[j];
+		arr[j] = l; 
+	}
+}
+void genRandomHV(int D, int randomHV[]) {
+	//Later will alter to be scanf (user input availability)
+	if (D % 2 != 0) {
+		printf("Dimension is odd");
+	}
+	else {
+		//Permute the Array
+		perm(D, randomHV);
+		
+		for(int i=0; i<D; i++) {
+			if (randomHV[i] <= D/2) {
+				randomHV[i] = 1;
+			}
+			else {
+				randomHV[i] = -1;
+			}
+		}
+	}
+}
 
+void buildLangHV(int N, int D, int langAM[][D], int iMHV[][D], char itemMemory[]) {
+	FILE *fileID;
+	int *sumHV;
+	sumHV = (int*)malloc(D * sizeof(int));
+	
+	
+	//Creating langLabels
+	char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
+	int length =  (sizeof langLabels)/(sizeof langLabels[0]); //size of langLabels
+	
+	char *buffer;
+	buffer = (char*)malloc(2000000 * sizeof(char));
+	
+	if(buffer == NULL) {
+		printf("Not enough memory!\n");
+		exit(1);
+	}
+	
+	//iterating through every file computingHV
+	for(int t=0; t<length; t++) {
+		//Creating the file address 
+		char fileAddress[110];
+		
+		snprintf(fileAddress, 110, "%s%s%s", "/home/benlucas/Desktop/sim/training_textsSIM/", langLabels[t], ".txt");
+		//printf("%s\n", fileAddress);
+		
+		//Opening the file address
+		fileID = fopen(fileAddress, "r"); 
+		
+		//Check to make sure the file can be opened
+		if (fileID == NULL) {
+			printf("Failed: File could not be opened.\n");
+			break;
+		}
+		
+		
+		//Compiles every character in the text document into array, buffer
+		
+		int count=0;
+		while(1) {
+			buffer[count] = fgetc(fileID);
+			if(feof(fileID)) {
+				buffer[count] = '\0';
+				break;
+			}
+			count++;	
+		}
+		fclose(fileID);
+		//printf("Loaded training language file %s\n", fileAddress);
+		
+		computeSumHV(N, D, sumHV, count, buffer, iMHV, itemMemory);
+		 
+		for(int i=0; i<D; i++) {
+			langAM[t][i] = sumHV[i];
+			//printf("%i ", langAM[t][i]);
+		}
+		//printf("\n");
+	}
+	free(sumHV);
+	free(buffer);
+}
+
+void computeSumHV(int N, int D, int *sumHV, int count, char *buffer, int iMHV[][D], char itemMemory[]) { 
+	int *block = (int *)malloc(N * D * sizeof(int)); 
+	
+	char key;
+	
+	for(int i=0; i<N; i++) {
+		for(int j=0; j<D; j++) {
+			*(block + i*D + j) = 0;
+		}
+	}
+	
+	for(int i=0; i<D; i++) {
+		*(sumHV +i) = 0;
+	}
+	
+	for(int i=0; i<count; i++) {
+		key = buffer[i];
+		circShift(N, D, block);
+		lookupItemMemory(D, iMHV, itemMemory, key, block); 
+		
+		if (i >= N) {
+			int *nGrams;
+			nGrams = (int*)malloc(D * sizeof(int));
+			
+			//assigns nGrams to the first row of block
+			for(int j=0; j<D; j++) {
+				nGrams[j] = *(block + j);
+			}	
+			
+			for(int j=1; j<N; j++) {
+				for(int l=0; l<D; l++) {
+					nGrams[l] = nGrams[l] * (*(block + j*D + l));
+				}
+			}
+			
+			for(int j=0; j<D; j++) {
+				sumHV[j] = sumHV[j] + nGrams[j];
+			}
+			free(nGrams);
+		}
+
+	}
+	free(block);
 }
 void circShift(int n, int d, int *arr) {	
     int *arr1 = (int *)malloc(n * d * sizeof(int)); 
@@ -213,348 +428,14 @@ void circShift(int n, int d, int *arr) {
 
 	free(arr1);
 }
-void computeSumHV(int N, int D, int *sumHV, int count, char *buffer, int *imhv, char itemMemory[], int imSize) { 
-	int *block = (int *)malloc(N * D * sizeof(int)); 
-	
-	char key;
-	
-	for(int i=0; i<N; i++) {
-		for(int j=0; j<D; j++) {
-			*(block + i*D + j) = 0;
+void lookupItemMemory(int D, int iMHV[][D], char itemMemory[], char key, int *block) {
+	for (int i=0; i<27; i++) {
+		if (itemMemory[i] == key) {
+				for(int j=0; j<D; j++) {
+					*(block + j) = iMHV[i][j];
+			}
+			break;
 		}
 	}
-	
-	for(int i=0; i<D; i++) {
-		*(sumHV +i) = 0;
-	}
-	
-	for(int i=0; i<count; i++) {
-		key = buffer[i];
-		circShift(N, D, block);
-        
-		lookupItemMemory(D, imhv, itemMemory, key, block, imSize); 
-		
-		if (i >= N) {
-			int *nGrams;
-			nGrams = (int*)malloc(D * sizeof(int));
-			
-			//assigns nGrams to the first row of block
-			for(int j=0; j<D; j++) {
-				nGrams[j] = *(block + j);
-			}	
-			
-			for(int j=1; j<N; j++) {
-				for(int l=0; l<D; l++) {
-					nGrams[l] = nGrams[l] * (*(block + j*D + l));
-				}
-			}
-			
-			for(int j=0; j<D; j++) {
-				sumHV[j] = sumHV[j] + nGrams[j];
-			}
-			free(nGrams);
-		}
-
-	}
-	free(block);
-}
-void buildLangHV(int N, int D, int length, char langLabels[][4], char cachedND[], int imSize, char itemMemory[], int *imhv) {
-	FILE *fileID;
-	FILE *langf;        //file ID for the lang .txt file
-
-	char fileAddress[110];	
-
-	for(int i=0; i<length; i++) {
-		char *buffer;
-		buffer = (char*)malloc(2000000 * sizeof(char));
-
-		int *sumHV;
-		sumHV = (int*)malloc(D * sizeof(int));
-
-		if(buffer == NULL) {
-			printf("Not enough memory!\n");
-			exit(1);
-		}
-
-		snprintf(fileAddress, 110, "%s%s%s", "/home/pi/Desktop/internship/training_textsSIM/", langLabels[i], ".txt");
-
-		langf = fopen(fileAddress, "r");
-
-		if (langf == NULL) {
-			printf("Failed: %s could not be opened.\n", fileAddress);
-			exit(1);
-		}
-
-		int count=0;
-		while(1) {
-			buffer[count] = fgetc(langf);
-			if(feof(langf)) {
-				buffer[count] = '\0';
-				break;
-			}
-			count++;	
-		}
-		
-		fclose(langf);
-		printf("Training: %s\n", fileAddress);
-
-		computeSumHV(N, D, sumHV, count, buffer, imhv, itemMemory, imSize);
-
-		char fiAd[37];                          //fileID for sumHV of lang
-		snprintf(fiAd, 37, "%s%s%c%c%c%s", cachedND, "la_", langLabels[i][0], langLabels[i][1], langLabels[i][2], ".txt");	
-		fileID = fopen(fiAd, "w");
-
-		for(int j=0; j<D; j++) {
-		    fprintf(fileID, "%i ", sumHV[j]);
-		}
-
-		fclose(fileID);
-		free(sumHV);
-		free(buffer);
-	}
-}
-double test(int N, int D, int *langAM, int *imhv, char itemMemory[], int imSize) {
-	DIR *dir;
-	struct dirent *sd;
-	FILE *fileID;
-
-	int *testSumHV;
-	testSumHV = (int*)malloc(D * sizeof(int));
-	
-	int *tmp;
-	tmp = (int*)malloc(D * sizeof(int));
-	
-	char *buffer;
-	buffer = (char*)malloc(300000 * sizeof(char));
-	
-	char fileLabel[][3] = {"af", "bg", "cs", "da", "nl", "de", "en", "et", "fi", "fr", "el", "hu", "it", "lv", "lt", "pl", "pt", "ro", "sk", "sl", "es", "sv"};
-	int length = (sizeof fileLabel)/(sizeof fileLabel[0]);
-	
-	double angle = 0.0;
-	char predicLang[3];
-	double correct=0.0;
-	double total = 0.0;
-	double accuracy = 0.0;
-	
-	dir = opendir("/home/pi/Downloads/testing_texts");
-	
-    if (dir == NULL) {
-        printf("Failed: Directory could not be openned.\n");
-        exit(1);
-    }
-	while((sd=readdir(dir)) != NULL) {
-		char fileAddress[300];
-		double maxAngle = -1.0;
-		
-        if (!strcmp (sd->d_name, "."))
-            continue;
-        if (!strcmp (sd->d_name, ".."))    
-            continue;
-		
-		
-		snprintf(fileAddress, 300, "%s%s", "/home/pi/Downloads/testing_texts/", sd->d_name);
-		fileID = fopen(fileAddress, "r"); 
-		
-        if (fileID == NULL) {
-            printf("Failed: %s could not be opened.\n", fileAddress);
-            break;
-        }
-
-        int count=0;
-	
-		while(1) {
-			buffer[count] = fgetc(fileID);
-			if(feof(fileID)) {
-				break;
-			}
-			count++;
-		}
-		buffer[count] = '\0';	//ending string, closing file
-
-		fclose(fileID);
-		//printf("Loaded: %s\n", fileAddress);
-		
-		computeSumHV (N, D, testSumHV, count, buffer, imhv, itemMemory, imSize);
-		binarizeHV(testSumHV, D);
-		
-		for(int l=0; l<length; l++) { //loop to go through the languages	
-			for(int i=0; i<D; i++) {
-				tmp[i] = *(langAM + l*D + i);
-			}	
-
-			angle = cosAngle(testSumHV, tmp, D);
-			
-			
-			if (angle > maxAngle) {
-				maxAngle = angle;
-				snprintf(predicLang, 3, "%c%c", fileLabel[l][0], fileLabel[l][1]);
-			}
-		}
-		
-		//printf("%s ", predicLang);
-		
-		if ((predicLang[0] == (sd->d_name)[0]) && (predicLang[1] == (sd->d_name)[1])) {
-			correct++;
-		}
-		total++;
-	}
-	closedir(dir);
-	free(buffer);
-	free(tmp);
-	free(testSumHV);
-	
-    accuracy = correct/total;
-    accuracy = accuracy * 100.0;
-	return accuracy;
-}
-void train(int N, int D, char itemMemory[], int imSize, int *imhv, char langLabels[][4], int length) {
-	
-    DIR* cacheDir;
-    DIR* ndDir;
-    FILE *fileID;
-    char fileAddress[37];
-    char cachedND[27];
-
-    snprintf(cachedND, 27, "%s%d%s%d%s", "SIMcachedTraining/", D, "_", N, "/");        //Directory information for cache
-    cacheDir = opendir("SIMcachedTraining");
-    if (cacheDir) {                     //Checks that the cacheDir already exists
-        ndDir = opendir(cachedND);  
-        if (ndDir){
-			for(int i=0; i<imSize; i++) {      		//Checks that all of the im files exist
-				if (itemMemory[i] == ' ') {
-					snprintf(fileAddress, 37, "%s%s", cachedND, "im__.txt");
-				}
-				else {
-					snprintf(fileAddress, 37, "%s%s%c%s", cachedND, "im_", itemMemory[i], ".txt");
-				}
-
-				fileID = fopen(fileAddress, "r"); 
-				if (fileID == NULL) {
-					loadiM(D, imSize, cachedND, itemMemory);
-					fclose(fileID);
-					break;
-				}
-
-				fclose(fileID);
-			}
-
-			createIMHV(D, imSize, itemMemory, cachedND, imhv);
-
-			for(int i=0; i<length; i++) {
-				snprintf(fileAddress, 37, "%s%s%c%c%c%s", cachedND, "la_", langLabels[i][0], langLabels[i][1], langLabels[i][2], ".txt");
-				fileID = fopen(fileAddress, "r");
-				if (fileID == NULL) {
-					buildLangHV(N, D, length, langLabels, cachedND, imSize, itemMemory, imhv);
-					fclose(fileID);
-					break;
-				}
-				fclose(fileID);
-			}
-            closedir(ndDir);
-        }
-
-        else if (ENOENT == errno) {                     //Checks that ndDir already exists (i.e. that if the cacheDir does not include memory for certain N&D, creates it)
-            createND(N, D, cachedND);                  //Checks if the directory is empty/missing files
-			loadiM(D, imSize, cachedND, itemMemory);
-			createIMHV(D, imSize, itemMemory, cachedND, imhv);
-			buildLangHV(N, D, length, langLabels, cachedND, imSize, itemMemory, imhv);
-        }
-
-        closedir(cacheDir);
-    }
-    else if (ENOENT == errno) {
-        createCache();
-        createND(N, D, cachedND);
-        loadiM(D, imSize, cachedND, itemMemory);
-	createIMHV(D, imSize, itemMemory, cachedND, imhv);
-        buildLangHV(N, D, length, langLabels, cachedND, imSize, itemMemory, imhv);
-    }
-	
-}
-
-void writeLines(int length, char langLabels[][4], int lineMax) {
-	
-	 FILE *fp;
-    FILE *langf;
-    char fileAddress[150];
-    char fileAddresslang[150];
-    
-    int count = 0;
-    int lines = 0;
-    
-	char *buff;
-	buff = (char*)malloc((300000) * sizeof(char));
-	
-	 for(int i=0; i<length; i++) {
-		
-		if(buff == NULL) {
-			printf("not enough memory\n");
-			exit(1);
-		}
-		
-		sprintf(fileAddress, "%s%s%s", "/home/pi/Desktop/internship/training_textsSIM/", langLabels[i], ".txt");
-		fp = fopen(fileAddress, "w+");
-		if(fp == NULL) {
-			printf("Error opening: %s\n", fileAddress);
-		}
-		sprintf(fileAddresslang, "%s%s%s", "/home/pi/Downloads/training_texts/", langLabels[i], ".txt");
-		langf = fopen(fileAddresslang, "r");
-		
-		if(langf == NULL) {
-			printf("Error opening: %s\n", fileAddresslang);
-			exit(1);
-		}
-		
-		while(lines < lineMax) {
-			buff[count] = fgetc(langf);
-			if(buff[count] == '\n') {
-				lines++;
-			}
-			count++;	
-		}
-		buff[count] = '\0';
-		fprintf(fp, "%s", buff);
-		
-		fclose(fp);
-		fclose(langf);
-	}
-	free(buff);
-	printf("Finished writing the first %d lines to files\n", lines);
-}
-
-void program(int N, int D) {
-    srand(time(0));
-    double accuracy = 0.0;    
-
-    char itemMemory[27] = "abcdefghijklmnopqrstuvwxyz ";     
-    int imSize = sizeof(itemMemory);
-    char langLabels[][4] = {"afr", "bul", "ces", "dan", "nld", "deu", "eng", "est", "fin", "fra", "ell", "hun", "ita", "lav", "lit", "pol", "por", "ron", "slk", "slv", "spa", "swe"};
-    int length =  (sizeof langLabels)/(sizeof langLabels[0]); //size of langLabels
-
-    int *imhv = (int*)malloc(imSize * D * sizeof(int));
-    int *langAM = (int*)malloc(length * D * sizeof(int));
-    
-    DIR *simDir;
-    simDir = opendir("training_textsSIM");
-
-    if(simDir) {
-	    printf("Found dir training_textsSIM\n");
-    }
-    else {
-	mkdir("training_textsSIM", 0777);
-	}
-		
-	for(int lineMax=100; lineMax<201; lineMax = lineMax+100) {
-		writeLines(length, langLabels, lineMax);
-		train(N, D, itemMemory, imSize, imhv, langLabels, length);
-		storeLangAM(N, D, langAM, length, langLabels);
-		accuracy = test(N, D, langAM, imhv, itemMemory, imSize);
-		printf("Accuracy:  %.2f%%\n", accuracy);
-	}	
-
-  
-    free(imhv);
-	free(langAM);
 
 }
-
