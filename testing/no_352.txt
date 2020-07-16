@@ -1,0 +1,1 @@
+ derfor sier det seg selv at du får ikke testet all verdens hjulsett og yaw vinkler på  t og  min men det er ikke så farlig siden sittestilling er med veldig god margin den største faktoren for den samlede aerodynamikken

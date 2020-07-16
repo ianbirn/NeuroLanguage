@@ -1,0 +1,1 @@
+ når du beskjærer et bilde blir delene utenfor beskjæringsboksen aldri helt slettet

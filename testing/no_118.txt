@@ -1,0 +1,1 @@
+ det er også mulig å foreta drill down for å se bakenforliggende transaksjonsdetaljer med bilagsvisning

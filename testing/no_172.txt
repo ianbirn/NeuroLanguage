@@ -1,0 +1,1 @@
+ innhold som ikke støttes i appen åpnes vanligvis i nettleseren i appen

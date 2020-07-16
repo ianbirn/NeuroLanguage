@@ -1,0 +1,1 @@
+ den klassiske bruken av google analytics utelukker ikke at andre personopplysninger enn ip adressen blir samlet inn av cookies fra google analytics

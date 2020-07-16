@@ -1,0 +1,1 @@
+i princip är enbart horisontala åtgärder tillåtliga eftersom de inte eller knappast rubbar konkurrensen

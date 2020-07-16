@@ -1,0 +1,1 @@
+ bunker üzerinde yakit seviye algilayicilari bulunmakta ve ana yakit silo veya deposundan bunkere yakit aktarimi bu algilayicilardan elde edilen sinyaller ile otomatik olarak gerçekleştirilebilmektedir

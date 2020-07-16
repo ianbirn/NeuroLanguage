@@ -1,0 +1,1 @@
+ kullanim db iki güç değerleri arasindaki orani dile getirdi

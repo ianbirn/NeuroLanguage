@@ -1,0 +1,1 @@
+ bir noktayi özellikle vurgulamak gerekiyor s ya da s ebatlarindaki kontaktörler sadece fonksiyon modüllerinin takilmasi gibi basit bir işlemle yön değiştirme ya da star delta wye delta başlaticilarin konfigürasyonunda kullanilabiliyor

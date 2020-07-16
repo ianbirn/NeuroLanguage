@@ -1,0 +1,1 @@
+ hvis du ikke får til å starte datamaskinen i normalmodus kan du kjøre dette verktøyet i sikkermodus

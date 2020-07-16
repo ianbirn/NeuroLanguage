@@ -1,0 +1,1 @@
+ skrivebordsprogrammene lastes ned fra creative cloud men installeres og kjøres lokalt

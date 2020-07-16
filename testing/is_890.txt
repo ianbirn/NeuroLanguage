@@ -1,0 +1,1 @@
+net date thu  aug   gmt connection close arcgis online grunnnámskeið um er að ræða dagsnámskeið þar sem farið er yfir helstu atriði arcgis online og hvernig megi nýta kerfið með öðrum esri hugbúnaði eða sem sjálfstæða veflausn

@@ -1,0 +1,1 @@
+ peki django öğrenmek için kaynak öneriniz var mi ya da web çatisi olmadan da python web programlama kaynaği da olabilir

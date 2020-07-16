@@ -1,0 +1,1 @@
+ noen svært gode beskrivelser av hvordan float fungerer er pseudoklasser for lenker skal spesifiseres i rekkefølgen link visited hover active

@@ -1,0 +1,1 @@
+ bu yöntemin dezavantaji ise sicakliğa bağimliliğinin yani sira sisteme özel kademelerin adaptasyonunun karmaşikliğidir

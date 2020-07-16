@@ -1,0 +1,1 @@
+ du velger hvordan påloggingen gjøres appen støtter sekssifrede genererte passord sms koder og automatiske varsler som lar deg godkjenne eller nekte en pålogging med ett trykk

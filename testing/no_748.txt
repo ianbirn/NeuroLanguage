@@ -1,0 +1,1 @@
+ vi anonymiserer dataene vi må lagre slik at de ikke kan brukes til andre formål enn å overholde slike juridiske forpliktelser

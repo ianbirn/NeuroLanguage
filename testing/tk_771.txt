@@ -1,0 +1,1 @@
+ hizmet akdinin belirleyici özelliği zaman ve bağimlilik unsurlaridir

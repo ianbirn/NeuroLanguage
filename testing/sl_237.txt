@@ -1,0 +1,1 @@
+denarja iz strukturnih skladov ni mogoče dobiti zaradi pravila de minimis

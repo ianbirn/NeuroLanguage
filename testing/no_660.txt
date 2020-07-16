@@ -1,0 +1,1 @@
+ denne strategien er nødvendig på grunn av svært dynamisk karakter av både t celler og i signalanlegget hendelser som skjer på tcr

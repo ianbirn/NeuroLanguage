@@ -1,0 +1,1 @@
+ yüklenici mallari idarenin belirli miktar ile görevlendirdiği araç şoförü ile araçlarla akaryakit istasyonuna geldiği zaman karşilayacaktir

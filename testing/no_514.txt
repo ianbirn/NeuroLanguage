@@ -1,0 +1,1 @@
+ som standard vil filen lagres i nedlastinger mappen på både mac  og windows maskiner

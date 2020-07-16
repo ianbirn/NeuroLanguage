@@ -1,0 +1,1 @@
+jest to dość stary problem który ujawnia się w regularnych odstępach czasu i do którego powracamy w wyniku różnych tragicznych wypadków

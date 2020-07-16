@@ -1,0 +1,1 @@
+athugaðu að javascript er mjög viðkvæmt fyrir stafsetningarvillum    ein semikomma á röngum stað og ekkert virkar

@@ -1,0 +1,1 @@
+ jp domenenavn og vi tegnlinjer som kan bli forvirret med ascii konverterte japanske domenenavn

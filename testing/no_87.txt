@@ -1,0 +1,1 @@
+ økt skalerbarhet ved at lasten distribueres fra policy manager til proxy servere

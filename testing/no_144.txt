@@ -1,0 +1,1 @@
+ kan kunde motta fakturaer som ehf via elma sevenfinans eller andre formater vil systemet automatisk finne ut av dette   og sende det på den foretrukne måten uten at den som sender trenger å foreta seg noe

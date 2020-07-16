@@ -1,0 +1,1 @@
+ først må du sjekke at du prøver å logge på med microsoft kontoen som er tilknyttet utviklerkontoen

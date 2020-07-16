@@ -1,0 +1,1 @@
+ fen lisesinde lgs puani  kolejde ise lgs puani  altinda yer alan öğrenciler alinmaz

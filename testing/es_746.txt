@@ -1,0 +1,1 @@
+sólo se admiten excepciones en casos exactamente definidos

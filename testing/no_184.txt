@@ -1,0 +1,1 @@
+ fbackup ser automatisk etter oppdateringer ukentlig så du får beskjed når en ny versjon er utgitt

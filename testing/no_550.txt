@@ -1,0 +1,1 @@
+ definer unntak fra automatisk modus basert på programvarenavn eller bulletin id er

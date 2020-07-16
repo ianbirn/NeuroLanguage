@@ -1,0 +1,1 @@
+ pi sayisi işik hizi gibi belirli değerlere sahip veriler kullanilarak bir program yazilacaksa const yapisini kullanmak kolaylik sağlar

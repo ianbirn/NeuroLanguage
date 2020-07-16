@@ -1,0 +1,1 @@
+ pass på at du har fire eller færre celler med informasjon i storyboardet ditt eller dataene dine kan gå tapt når du bytter til frayer modelloppsettet

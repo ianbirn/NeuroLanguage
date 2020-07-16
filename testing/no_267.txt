@@ -1,0 +1,1 @@
+ når brukerne har lagt inn en anmeldelse eller avvist meldingen vises den ikke igjen

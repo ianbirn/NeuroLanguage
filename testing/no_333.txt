@@ -1,0 +1,1 @@
+ du kan lime inn css deklarasjonene under helt i toppen av stilarket for å tilnærmet nullstille designet gjelder versjon b av ipublishtheme   det som brukes mens jeg skriver dette blogginnlegget

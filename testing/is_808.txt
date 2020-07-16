@@ -1,0 +1,1 @@
+net date sat  aug   gmt connection close námskeið er ætlað þeim sem hafa þekkingu á landupplýsingakerfum og eru vanir að vinna með arcgis hugbúnað

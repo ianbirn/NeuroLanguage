@@ -1,0 +1,1 @@
+no se deberían suavizar las líneas fundamentales de dicho código

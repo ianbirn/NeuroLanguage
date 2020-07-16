@@ -1,0 +1,1 @@
+ hvis du velger ikke å oppgi posisjonsdataene dine er det mulig at ccs ikke vil kunne levere den forespurte tjenesten eller fullføre den forespurte transaksjonen

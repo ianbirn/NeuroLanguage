@@ -1,0 +1,1 @@
+ sikkerhetskopiering av nettsteder krypterer alle filer mapper og databaser som blir overført og lagret
