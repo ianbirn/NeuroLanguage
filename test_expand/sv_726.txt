@@ -1,1 +1,0 @@
-undantag tillåts endast i exakt definierade fall

@@ -1,1 +1,0 @@
-tästä voi päätellä että suuntaviivat on laadittava laajoiksi suuntaa antaviksi ja joustaviksi jotta niistä on apua ohjelmiemme toteutuksesta vastaaville henkilöille sekä tukirahojen käyttäjille ja jotta saamme mahdollisimman paljon irti uusista viriävistä aloista

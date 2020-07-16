@@ -1,1 +1,0 @@
-se va evita complet duplicarea testelor pe animale

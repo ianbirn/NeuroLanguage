@@ -1,1 +1,0 @@
-jest to dziedzina w której bardzo łatwo jest uznać e nasz cel jest słuszny
