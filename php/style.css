@@ -1,0 +1,88 @@
+body {
+    font-family: "Raleway", sans-serif;
+}
+
+img {
+    height: 175px;
+    display: inline-block;
+    padding-bottom: 50px;
+}
+
+h1 {
+    font-size: 25px;
+    text-transform: uppercase;
+    font-weight: normal;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+h3 {
+    font-size: 20px;
+    font-weight: normal;
+}
+
+h4 {
+    font-size: 15px;
+    font-weight: normal;
+}
+
+.textbox {
+    border: none;
+    border-bottom: 1px solid #8d979b;
+}
+
+.button {
+    font-family: "Raleway", sans-serif;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    background-color: rgb(201, 201, 201);
+}
+
+.button:hover {
+    background-color: rgb(230, 249, 255);
+}
+
+.button:focus {
+    background-color: rgb(230, 249, 255);
+}
+
+#low {
+    background-color: rgb(255, 255, 149);
+}
+
+#low:hover {
+    background-color: rgb(252, 252, 106);
+}
+
+#low:focus {
+    background-color: rgb(252, 252, 106);
+}
+
+#medium {
+    background-color: rgb(255, 230, 149);
+}
+
+#medium:hover {
+    background-color: rgb(247, 214, 107);
+}
+
+#medium:focus {
+    background-color: rgb(247, 214, 107);
+}
+
+#high {
+    background-color: rgb(152, 248, 128);
+}
+
+#high:hover {
+    background-color: rgb(121, 247, 90);
+}
+
+#high:focus {
+    background-color: rgb(121, 247, 90);
+}
