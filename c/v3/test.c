@@ -84,47 +84,50 @@ void test(int N, int D, int *langAM, int *iMHV, wchar_t *itemMemory, int imSize,
         if (!strcmp (sd->d_name, ".."))    
             continue;
 
-        sprintf(fileAddress, "%s%s", "../../testing/", sd->d_name);
-        int n=0;
-        f=fopen(fileAddress, "r");
-        while (1) {
-            buff[n] = fgetwc(f);
-            if (feof(f)) {
-                buff[n] = '\0';
-                break;
+        
+        //if (((sd->d_name)[0] == 'a') && ((sd->d_name)[1] == 'f')) {
+            sprintf(fileAddress, "%s%s", "../../testing/", sd->d_name);
+            int n=0;
+            f=fopen(fileAddress, "r");
+            while (1) {
+                buff[n] = fgetwc(f);
+                if (feof(f)) {
+                    buff[n] = '\0';
+                    break;
+                }
+                n++;
             }
-            n++;
-        }
-        fclose(f);
+            fclose(f);
+            wprintf(L"Loaded %s\n", fileAddress);
 
-        wprintf(L"Loaded %s\n", fileAddress);
+            computeSumHV(N, D, testSumHV, buff, n, itemMemory, iMHV, imSize);
+            free(buff);
+            binarizeHV(testSumHV, D);
 
-        computeSumHV(N, D, testSumHV, buff, n, itemMemory, iMHV, imSize);
-        free(buff);
-        binarizeHV(testSumHV, D);
-
-        double maxAngle = -1.0;
-        for(int l=0; l<length; l++) {
-            double angle=0.0;
-            int *tmp = (int*)malloc(D * sizeof(int));
+            double maxAngle = -1.0;
+            for(int l=0; l<length; l++) {
+                double angle=0.0;
+                int *tmp = (int*)malloc(D * sizeof(int));
             
-            for(int i=0; i<D; i++) {
-                tmp[i] = *(langAM + l*D + i);
+                for(int i=0; i<D; i++) {
+                    tmp[i] = *(langAM + l*D + i);
+                }
+
+                angle = cosAngle(tmp, testSumHV, D);
+
+                if (angle > maxAngle) {
+                    maxAngle = angle;
+                    sprintf(predicLang, "%s", fileLabel[l]);
+                }
+                free(tmp);
             }
 
-            angle = cosAngle(tmp, testSumHV, D);
-
-            if (angle > maxAngle) {
-                maxAngle = angle;
-                sprintf(predicLang, "%s", fileLabel[l]);
+            if (((sd->d_name)[0] == predicLang[0]) && ((sd->d_name)[1] == predicLang[1])) {
+                correct++;
             }
-            free(tmp);
-        }
+            total++;
 
-        if (((sd->d_name)[0] == predicLang[0]) && ((sd->d_name)[1] == predicLang[1])) {
-            correct++;
-        }
-        total++;
+        //}
         
         free(testSumHV);
         free(fileAddress);

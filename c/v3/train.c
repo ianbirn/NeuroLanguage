@@ -66,7 +66,7 @@ void createIMHV(int D, int imSize, wchar_t *itemMemory, char cachedND[], int *im
 void buildLangHV(int N, int D, int length, char langLabels[][4], char cachedND[], int imSize, wchar_t *itemMemory, int *imhv) {
     FILE *f;
     for(int l=0; l<length; l++) {
-        wchar_t *buffer = (wchar_t *)malloc(2500000000 * sizeof(wchar_t));
+        wchar_t *buffer = (wchar_t *)malloc(3200000000 * sizeof(wchar_t));
         int *sumHV = (int*)malloc(D * sizeof(int));
         char *fileAddress = (char*)malloc(25 * sizeof(char));
         sprintf(fileAddress, "%s%s%s", "../../training/", langLabels[l], ".txt");
