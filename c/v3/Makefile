@@ -1,6 +1,6 @@
 
-langRec: train.o computations.o test.o main.o
-	gcc -O5 -Wall train.c computations.c test.c main.c -o langRec -lm
+langRec: train.o computations.o test.o MAIN.o
+	gcc -O5 -Wall train.c computations.c test.c MAIN.c -o langRec -lm
 
 train.o:
 	gcc -O5 -c train.c 
@@ -11,8 +11,8 @@ computations.o:
 test.o: 
 	gcc -O5 -c test.c 
 
-main.o:
-	gcc -O5 -c main.c 
+MAIN.o:
+	gcc -O5 -c MAIN.c 
 
 clean:
 	rm *.o 
