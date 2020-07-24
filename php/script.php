@@ -38,7 +38,7 @@
 
         if(isset($_POST['Detect'])){
             $phrase = $_POST['input'];
-            $lang = exec("langRec.exe $D '$phrase'");
+            $lang = exec("./langRec $D '$phrase'");
             print($lang);
         }
         

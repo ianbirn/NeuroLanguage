@@ -60,9 +60,9 @@ double dotProduct(int *a, int *b, int n) {
 double cosAngle(int *a, int *b, int n) {
 	return dotProduct(a, b, n)/(norm(a, n)*norm(b, n));	
 }
-void test(int N, int D, int *langAM, int *iMHV, wchar_t *itemMemory, int imSize, char langLabels[][4], char actualLabels[][11], int length, wchar_t *unknown) {
+void test(int N, int D, int *langAM, int *iMHV, wchar_t *itemMemory, int imSize, char actualLabels[][11], char langLabels[][4], int length, wchar_t *unknown) {
     int *testSumHV = (int*)malloc(D * sizeof(int));
-    char *predicLang = (char*)malloc(11 * sizeof(char));
+    char *predicLang = (char*)malloc(3 * sizeof(char));
 
     storeLangAM(N, D, langAM, length, langLabels);
     int n = wcslen(unknown);

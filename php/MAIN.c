@@ -1,18 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <math.h>
 #include <string.h>
 #include <wchar.h>
 #include <ctype.h>
 #include <locale.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <sys/time.h>
 #include <time.h>
-#include <errno.h>
-#include <sys/stat.h> 
-#include <sys/types.h>
 #include "train.h"
 #include "test.h"
 #include "computations.h"
@@ -37,6 +29,7 @@ int main(int argc, char** argv) {
 
     //For randomizing
     srand(time(0));
+
 
 /*************************************************/
     int D = atoi(argv[1]);
@@ -70,9 +63,9 @@ int main(int argc, char** argv) {
     //Variable Declaration  
     int *langAM = (int*)malloc(length * D * sizeof(int));
     int *iMHV = (int*)malloc(imSize * D * sizeof(int));
- 
+
     train(N, D, itemMemory, imSize, iMHV, langLabels, length);
-    test(N, D, langAM, iMHV, itemMemory, imSize, langLabels, actualLabels, length, unknown);
+    test(N, D, langAM, iMHV, itemMemory, imSize, actualLabels, langLabels, length, unknown);
 
     free(unknown);
     free(iMHV);

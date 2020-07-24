@@ -32,6 +32,7 @@ h4 {
 }
 
 .button {
+    -webkit-appearance: none;
     font-family: "Raleway", sans-serif;
     border: none;
     padding: 10px 20px;

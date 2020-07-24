@@ -17,6 +17,6 @@ double dotProduct(int *a, int *b, int n);
 double cosAngle(int *a, int *b, int n);
 
 /**Compute HVs on different testfiles and runs similarity tests with language files to predict the language of each test file**/
-void test(int N, int D, int *langAM, int *iMHV, wchar_t *itemMemory, int imSize, char langLabels[][4], char actualLabels[][11], int length, wchar_t *unknown);
+void test(int N, int D, int *langAM, int *iMHV, wchar_t *itemMemory, int imSize, char actualLabels[][11], char langLabels[][4], int length, wchar_t *unknown);
 
 #endif
