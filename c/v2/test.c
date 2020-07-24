@@ -78,7 +78,7 @@ void test(int N, int D, int *langAM, int *imhv, char itemMemory[], int imSize, c
 	int index2=0;
 	int index3=0;
 	
-	dir = opendir("../../unknown");
+	dir = opendir("./unknown");
 	
     if (dir == NULL) {
         printf("Failed: Directory could not be openned.\n");
@@ -95,7 +95,7 @@ void test(int N, int D, int *langAM, int *imhv, char itemMemory[], int imSize, c
             continue;
 		
 		
-		snprintf(fileAddress, 276, "%s%s", "../../unknown/", sd->d_name);
+		snprintf(fileAddress, 276, "%s%s", "./unknown/", sd->d_name);
 		fileID = fopen(fileAddress, "r"); 
 		
         if (fileID == NULL) {
@@ -147,9 +147,6 @@ void test(int N, int D, int *langAM, int *imhv, char itemMemory[], int imSize, c
 				index3 = l;
 			}
 		}
-
-		
-		
 		printf("Written in: %s\nOtherwise, possibly: %s or %s\n\n", fullName[index1], fullName[index2], fullName[index3]);
 	}
 	closedir(dir);
