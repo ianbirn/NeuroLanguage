@@ -11,7 +11,7 @@ over 94.5% on all versions of the program, though D=10000 will yield the highest
 # Structure
 This directory contains different versions of the program. The follow is an overview of the different directories.
 
-###### olderVersions-noSplit/
+## olderVersions-noSplit/
 `olderVersions-noSplit/` - contains original file versions that are not split into header/src files
 
 `olderVersions-noSplit/langRec_v1.c` - original implementation based on Rahimi model (combined training/testing)
@@ -19,7 +19,7 @@ This directory contains different versions of the program. The follow is an over
 `olderVersions-noSplit/langRec_v2.c` - split training/testing, where if `./cachedTraining` will pull memory (if it doesn't exist
 or has files missing it'll generate; currently no cache is loaded)
 
-###### v1/ *directories working with: ../../training_texts & ../../testing_texts*
+## v1/ *directories working with: ../../training_texts & ../../testing_texts*
 `v1/` - an expansion of *olderVersions-noSplit/langRec_v2.c* that is split into header/src files
 
 `v1/cachedTraining/` - a directory of memory for values D=1000,3000,5000,10000 and N=3,4,5
