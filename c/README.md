@@ -16,7 +16,7 @@ This directory contains different versions of the program. The follow is an over
 
 `olderVersions-noSplit/langRec_v1.c` - original implementation based on Rahimi model (combined training/testing)
 
-`olderVersions-noSplit/langRec_v2.c` - split training/testing, where if `./cachedTraining` will pull memory (if it doesn't exist
+`olderVersions-noSplit/langRec_v2.c` - split training/testing, where */cachedTraining* will pull memory (if it doesn't exist
 or has files missing it'll generate; currently no cache is loaded)
 
 ## v1/ *directories working with: ../../training_texts & ../../testing_texts*
