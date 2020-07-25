@@ -8,7 +8,7 @@
 </head> 
 
 <body>
-    <img src="NUEROLANGUAGE.jpg">
+    <img src="logo.jpg">
 
     <br>
     <form action="" method="post">
