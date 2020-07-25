@@ -1,4 +1,4 @@
-# NeuroLanguage
+# NeuroLanguage - Brain Inspired Language Recognition
 This project is based on the [Language Recognition Application](https://github.com/abbas-rahimi/HDC-Language-Recognition) by [Abbas Rahimi](https://github.com/abbas-rahimi), 
 which uses Hyperdimesnional Computing principles for language detection. The program was initially developed in Matlab, and has been programmed 
 in Python and C. These two languages proved to be significantly faster than the Matlab implementation, where Python performed ~2x faster and C ~8x faster. 
@@ -16,8 +16,50 @@ itemMemory (more information in the C folder).
 
 ## Running the Program
 **For C:** Most of the directories include a Makefile, which if you have no experience with, compiles the header files and main file for you. Therefore,
-all you need to do is type `make` in the cmd line (default to windows format). -O5 is recommended for fastest performance 
+all you need to do is type `make` in the cmd line (default to windows format). `gcc -O5` is recommended for fastest performance 
 (for NonSplit versions that require cmd line compilation)
+
+For compiling (non-split):
+
+> `gcc -O5 langRec_v1.c -o langRec_v1 -lm`
+
+> `gcc -O5 langRec_v2.c -o langRec_v2 -lm`
+
+
+For running (non-split) on Linux:
+
+> `./langRec_v1`
+
+> `./langRec_v2`
+
+
+For running (non-split) on Linux:
+
+> `langRec_v1.exe`
+
+> `langRec_v2.exe`
+
+
+For compiling all other versions (using Makefile):
+
+> `make`
+
+> `make clean`
+
+*NOTE: if you make any changes to N or D (or anywhere else), you will need to do `make` and `make clean` again to refresh langRec*
+
+
+For running all other versions - v1-v3 (Linux & Windows respectively):
+> `./langRec`
+> `langRec.exe`
+
+
+For running v4 (Linux & Windows respectively):
+> argv[1] = D = dimensionality size (ex: 10000); argv[2] = phrase = unknown you want to detect (*NOTE: MUST BE IN QUOTATIONS OR THE PROGRAM WILL ONLY READ THE FIRST WORD*)
+> `./langRec D "this is the sentence"`
+> `langRec.exe D "this is the sentence"`
+
+
 
 **For Python:**
 
