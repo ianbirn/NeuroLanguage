@@ -1,1 +1,1 @@
-test my program some more this is a sentence written in english
+this is a testing sentence for the language recognition program

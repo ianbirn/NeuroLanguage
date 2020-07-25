@@ -5,6 +5,11 @@ import subprocess
 import os
 from threading import Thread
 from decimal import Decimal
+from pythonFunctions import *
+
+iM={}
+langLabels = np.array(['afr', 'bul', 'ces', 'dan', 'nld', 'deu', 'eng', 'est', 'fin', 'fra', 'ell', 'hun', 'ita', 'lav', 'lit', 'pol', 'por', 'ron', 'slk', 'slv', 'spa', 'swe'])
+langAM={}
 
 def next_button():
     awesome.destroy()
@@ -93,21 +98,45 @@ else:
             return
         entryFile.write(e.get())
         entryFile.close()
-        langNum = main.sentence(N, D)
-        percentage = main.sentencePercentage(N, D)
-        percentage = round(percentage, 2)
-        if langNum == -1:
-            ans.config(text="Please train that setting first!")
-        elif langNum == -2:
-            ans.config(text="Please train a setting first!")
+        
+        if var.get() == 'Python':
+            path = 'cachedTraining/' + str(D) + '_' + str(N)
+            if not os.path.isdir(path):
+                print('folder does not exist!')
+                exit()
+	
+            #read in the training files
+            for arr, name in readTrainingFiles(path + '/'):
+                if (name[0:2] == 'im'):
+                    newKey = os.path.splitext(name)[0][3:]
+                    iM[newKey] = arr
+                if (name[0:2] == 'la'):
+                    newKey = os.path.splitext(name)[0][3:]
+                    langAM[newKey] = arr
+	
+        #print(iM)
+        #print(langAM)
+        #testing the function
+        
+            lang = testHV(iM, langAM, N, D, langLabels, str(e.get()))
+            print(lang)
+            ans.config(text='My guess: ' + lang[0])
         else:
-            lang = list1[langNum]
-            if percentage < 60:
-                ans.config(text="My guess: " + lang + " " + str(percentage) + "% match", fg="red", font='bold')
-            elif percentage < 80:
-                ans.config(text="My guess: " + lang + " " + str(percentage) + "% match", fg="dark orange", font='bold')
-            elif percentage <= 100:
-                ans.config(text="My guess: " + lang + " " + str(percentage) + "% match", fg="green", font='bold')
+            langNum = main.sentence(N, D)
+            percentage = main.sentencePercentage(N, D)
+            percentage = round(percentage, 2)
+            if langNum == -1:
+                ans.config(text="Please train that setting first!")
+            elif langNum == -2:
+                ans.config(text="Please train a setting first!")
+            else:
+                lang = list1[langNum]
+                if percentage < 60:
+                    ans.config(text="My guess: " + lang + " " + str(percentage) + "% match", fg="red", font='bold')
+                elif percentage < 80:
+                    ans.config(text="My guess: " + lang + " " + str(percentage) + "% match", fg="dark orange", font='bold')
+                elif percentage <= 100:
+                    ans.config(text="My guess: " + lang + " " + str(percentage) + "% match", fg="green", font='bold')
             #global survey
             #survey = Label(prg, text="Was I correct?")
             #survey.grid(row=3, column=0, padx=15, pady=15)
@@ -142,12 +171,33 @@ else:
         e.delete(0, END)
         
     def button_train():
-        data, values = os.pipe()
-        valuestr = str(N) + " " + str(D) + "\n"
-        os.write(values, bytes(valuestr, "utf-8"));
-        os.close(values)
-        s = subprocess.check_output("gcc -O5 main.c -o main -lm;./main", stdin = data, shell=True)
-        print(s.decode("utf-8"))
+        iM={}
+        langAM={}
+        if var.get() == 'Python':
+            iM, langAM = buildLanguageHV(iM, langAM, langLabels, N, D)
+	
+            #check if folder exists, create or clear it
+            path = 'cachedTraining/' + str(D) + '_' + str(N)
+            if not os.path.isdir(path):
+                os.mkdir(path)
+	
+            #write itemMemory
+            for key, value in iM.items():
+                filename = 'im_' + key + '.csv'
+                with open(path + '/' + filename, 'w') as thefile:
+                    np.savetxt(thefile, value, delimiter=',')
+
+            for key, value in langAM.items():
+                filename = 'la_' + key + '.csv'
+                with open(path + '/' + filename, 'w') as thefile:
+                    np.savetxt(thefile, value, delimiter=',')
+        else:
+            data, values = os.pipe()
+            valuestr = str(N) + " " + str(D) + "\n"
+            os.write(values, bytes(valuestr, "utf-8"));
+            os.close(values)
+            s = subprocess.check_output("gcc -O5 main.c -o main -lm;./main", stdin = data, shell=True)
+            print(s.decode("utf-8"))
         
         if N==5:
             done.config(text="Done training low setting!")
@@ -243,6 +293,12 @@ else:
     e = Entry(prg, borderwidth=5, width=40)
     e.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
 
+
+    options = ['C','Python']
+    var = StringVar(prg)
+    var.set(options[0])
+    optmenu = OptionMenu(prg, var, *options).grid(row=3, column=4)
+    
     #BUTTON MATRIX
     buttons = [writeFileB, clearB, trainB]
 
