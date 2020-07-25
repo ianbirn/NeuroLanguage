@@ -15,7 +15,8 @@ itemMemory (more information in the C folder).
 * PHP 7.2.3
 
 ## Running the Program
-**For C:** Most of the directories include a Makefile, which if you have no experience with, compiles the header files and main file for you. Therefore,
+#### For C: 
+Most of the directories include a Makefile, which if you have no experience with, compiles the header files and main file for you. Therefore,
 all you need to do is type `make` in the cmd line (default to windows format). `gcc -O5` is recommended for fastest performance 
 (for NonSplit versions that require cmd line compilation)
 
@@ -61,7 +62,8 @@ For running v4 (Linux & Windows respectively):
 
 
 
-**For Python:**
+#### For Python:
+Pythong running instructions.
 
 ## Authors
 * Ian Birn - [ianbirn](https://github.com/ianbirn)
