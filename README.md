@@ -32,7 +32,7 @@ For running (non-split) on Linux:
 > `./langRec_v2`
 
 
-For running (non-split) on Linux:
+For running (non-split) on Windows:
 
 > `langRec_v1.exe`
 
