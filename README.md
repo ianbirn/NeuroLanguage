@@ -52,6 +52,7 @@ all you need to do is type `make` in the cmd line (default is Linux format). `gc
 
 
 **For running v4 (Linux & Windows respectively):**
+
 *KEY: argv[1] = D = dimensionality size (ex: 10000); argv[2] = phrase = unknown you want to detect (NOTE: MUST BE IN QUOTATIONS OR THE PROGRAM WILL ONLY READ THE FIRST WORD)*
 
 > `./langRec D "this is the sentence"`
