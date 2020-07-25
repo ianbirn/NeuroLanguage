@@ -21,14 +21,12 @@ all you need to do is type `make` in the cmd line (default to windows format). `
 (for NonSplit versions that require cmd line compilation)
 
 For compiling (non-split):
-
 > `gcc -O5 langRec_v1.c -o langRec_v1 -lm`
 
 > `gcc -O5 langRec_v2.c -o langRec_v2 -lm`
 
 
 For running (non-split) on Linux:
-
 > `./langRec_v1`
 
 > `./langRec_v2`
@@ -42,7 +40,6 @@ For running (non-split) on Linux:
 
 
 For compiling all other versions (using Makefile):
-
 > `make`
 
 > `make clean`
@@ -52,18 +49,21 @@ For compiling all other versions (using Makefile):
 
 For running all other versions - v1-v3 (Linux & Windows respectively):
 > `./langRec`
+
 > `langRec.exe`
 
 
 For running v4 (Linux & Windows respectively):
 > argv[1] = D = dimensionality size (ex: 10000); argv[2] = phrase = unknown you want to detect (*NOTE: MUST BE IN QUOTATIONS OR THE PROGRAM WILL ONLY READ THE FIRST WORD*)
+
 > `./langRec D "this is the sentence"`
+
 > `langRec.exe D "this is the sentence"`
 
 
 
 #### For Python:
-Pythong running instructions.
+Python running instructions.
 
 ## Authors
 * Ian Birn - [ianbirn](https://github.com/ianbirn)
