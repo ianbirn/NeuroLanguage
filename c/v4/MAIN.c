@@ -17,15 +17,7 @@
 #include "test.h"
 #include "computations.h"
 
-void perm(int D, int *arr);
-void genRandomHV(int D, int *randomHV);
-void circShift(int n, int d, int *arr);
-void lookupItemMemory(int D, int *block, wchar_t *buffer, wchar_t *itemMemory, wchar_t key, int *iMHV, int size);
-void computeSumHV(int N, int D, int *sumHV, wchar_t *buffer, int count, wchar_t *itemMemory, int *iMHV, int size);
-void binarizeHV(int *v, int szofv);
-double norm(int *a, int n);
-double dotProduct(int *a, int *b, int n);
-double cosAngle(int *a, int *b, int n);
+void cleanText(wchar_t *itemMemory, wchar_t *alphMemory, wchar_t *unknown, int imSize);
 
 int main(int argc, char** argv) {
     //Setting locale(for utf-8 purposes)
@@ -59,16 +51,18 @@ int main(int argc, char** argv) {
 /******************************************************/
 /*                  Item Memory                      */
     wchar_t *itemMemory = L" abcdefghijklmnopqrstuvwxyzăãāàáąåäâæßçčćďðéėēèêěëęģğîïíìįīķłļľñńňŉņōôóòõőøöœþšșśşťřŕúűūůųùûüÿýỳžżабвгґдеёжзэєїіийклмнопрстуфхцчшщъьыюяαβγδέεζήηθίικλμνξόοπρστυφχψώω";
+    wchar_t *alphMemory = L" ABCDEFGHIJKLMNOPQRSTUVWXYZĂÃĀÀÁĄÅÄÂÆßÇČĆĎÐÉĖĒÈÊĚËĘĢĞÎÏÍÌĮĪĶŁĻĽÑŃŇŉŅŌÔÓÒÕŐØÖŒÞŠȘŚŞŤŘŔÚŰŪŮŲÙÛÜŸÝỲŽŻАБВГҐДЕЁЖЗЭЄЇІИЙКЛМНОПРСТУФХЦЧШЩЪЬЫЮЯΑΒΓΔΈΕΖΉΗΘΊΙΚΛΜΝΞΌΟΠΡΣΤΥΦΧΨΏΩ";
     int imSize= wcslen(itemMemory);
 /*****************************************************/
 
 
 /*****************************************************/
 /*Conversion of argv[2] to be compatable for testing*/
-    const char *str = argv[2];
-    int maxSize = 10000;
-    wchar_t *unknown = (wchar_t *)malloc(maxSize * sizeof(wchar_t));
-    mbstowcs(unknown, str, maxSize);
+    const char *str = argv[2];                          //grabs agrv[2] to be the unknwon text
+    int maxSize = 10000;                                //the max input size
+    wchar_t *unknown = (wchar_t *)malloc(maxSize * sizeof(wchar_t));    //the wchar version of str
+    mbstowcs(unknown, str, maxSize);                                    //converts str (multibyte c-string) to unknown (wchar)
+    cleanText(itemMemory, alphMemory, unknown, imSize);
 /*****************************************************/
 
     //Variable Declaration  
@@ -94,4 +88,45 @@ int main(int argc, char** argv) {
     free(iMHV);
     free(langAM);
     return 0;
+}
+
+void cleanText(wchar_t *itemMemory, wchar_t *alphMemory, wchar_t *unknown, int imSize) {
+    int unknownSize= wcslen(unknown);
+    int check=0;
+    for(int i=0; i<unknownSize; i++) {
+        if (unknown[i] == L'-') {
+            unknown[i] = ' ';
+        }
+        else if(unknown[i] == L'—') {
+            unknown[i] = ' ';
+        }
+        else if(unknown[i] == L'–') {
+            unknown[i] = ' ';
+        }
+        else if(unknown[i] == L'/') {
+            unknown[i] = ' ';
+        }     
+        for(int j=0; j<imSize; j++) {
+            if(unknown[i] == alphMemory[j]) {
+                unknown[i] = itemMemory[j];
+                break;
+            }
+        }
+    }
+
+    for(int i=0; i<unknownSize; i++) {
+        for(int j=0; j<imSize; j++) {
+            if(unknown[i] == itemMemory[j]) {
+                check=0;
+                break;
+            }
+            else {
+                check=1;
+            }
+        }
+
+        if(check==1) {
+            wmemmove(&unknown[i], &unknown[i+1], unknownSize-i);
+        }
+    }   
 }
