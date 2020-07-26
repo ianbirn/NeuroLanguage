@@ -14,6 +14,26 @@ itemMemory (more information in the C folder). As well, there is a PHP directory
 * Python 3.8
 * PHP 7.2.3
 
+## Structure
+The Python and C directories have README.md for more information on the structure and specifications of files. The following is a basic breakdown
+of this repository.
+
+`GUI/` - contains the relevant files for executing a user interface version of the program (contains training ability)
+
+`c/` - contains the relevant directories/files for different variations of the program written in C, as well as executional instructions
+
+`php/` - contains C files, cache, and PHP file for running instantaneous detection from any web client (server was run on Raspberry PI 4 for our purposes)
+
+`python/` - contains the relevant directories/files for different variations of the program written in Python, as well as executional instructions
+
+`testing/` - the testing directory for the expanded version of C (the additional characters and languages)
+
+`testing_texts`/ - the testing directory pulled from Abbas Rahimi's original Matlab implementation (27 characters & 22 languages)
+
+`training/` - the training directory for the expanded version of C (the additional characters and languages)
+
+`training_texts/` - the training directory pulled from Abbas Rahimi's original Matlab implementation (27 characters & 22 languages)
+
 ## Running the Program
 #### For C: 
 Most of the directories include a Makefile, which if you have no experience with, compiles the header files and main file for you. Therefore,
