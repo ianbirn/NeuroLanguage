@@ -1,1 +1,0 @@
-this is a testing sentence for the language recognition program
