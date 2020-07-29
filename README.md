@@ -81,7 +81,8 @@ all you need to do is type `make` in the cmd line (default is Linux format). `gc
 
 
 #### For Python:
-Python running instructions.
+All programs are written in python3. To run any file, type in the command line python3 "fileName".
+To run the split training and testing files, run the training file first and then run the testing files, making sure to keep N and D the same when training and testing.
 
 ## Authors
 * Ian Birn - [ianbirn](https://github.com/ianbirn)
