@@ -7,7 +7,7 @@ import time
 def readLabels(langLabels): 
 	i = 0
 	while i < langLabels.size:
-		address = 'training_texts/' + langLabels[i] + '.txt'
+		address = '../training_texts/' + langLabels[i] + '.txt'
 		buff = []
 		for row in open(address, 'r'):
 			buff.append(row)
